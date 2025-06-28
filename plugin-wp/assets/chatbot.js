@@ -1,10 +1,72 @@
 /**
- * Veronica Schembri Chatbot Frontend
+ * Veronica Schembri Chatbot Frontend - With Markdown Support
  * React-based chatbot widget
  */
 
 (function () {
   "use strict";
+
+  // Markdown formatting function
+  function formatMessageText(text) {
+    if (!text) return "";
+
+    return (
+      text
+        // Headers
+        .replace(
+          /### (.*?)$/gm,
+          '<h3 style="margin: 8px 0; font-weight: bold; font-size: 1.1em;">$1</h3>'
+        )
+        .replace(
+          /## (.*?)$/gm,
+          '<h2 style="margin: 10px 0; font-weight: bold; font-size: 1.2em;">$1</h2>'
+        )
+        .replace(
+          /# (.*?)$/gm,
+          '<h1 style="margin: 12px 0; font-weight: bold; font-size: 1.3em;">$1</h1>'
+        )
+
+        // Bold
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+
+        // Links
+        .replace(
+          /\[([^\]]+)\]\(([^)]+)\)/g,
+          '<a href="$2" target="_blank" style="color: #3b82f6; text-decoration: underline;">$1</a>'
+        )
+
+        // Handle lists
+        .split("\n")
+        .map((line, index, array) => {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("- ")) {
+            const content = trimmed.replace(/^- /, "");
+            // Check if this is the first item in a list
+            const prevLine = array[index - 1] ? array[index - 1].trim() : "";
+            const nextLine = array[index + 1] ? array[index + 1].trim() : "";
+
+            let listItem = `<li style="margin-left: 20px; margin-bottom: 4px;">${content}</li>`;
+
+            // Wrap in ul if it's a standalone item or first/last in sequence
+            if (!prevLine.startsWith("- ") && !nextLine.startsWith("- ")) {
+              listItem = `<ul style="margin: 8px 0; padding-left: 20px;">${listItem}</ul>`;
+            } else if (!prevLine.startsWith("- ")) {
+              listItem = `<ul style="margin: 8px 0; padding-left: 20px;">${listItem}`;
+            } else if (!nextLine.startsWith("- ")) {
+              listItem = `${listItem}</ul>`;
+            }
+
+            return listItem;
+          }
+          return line;
+        })
+        .join("<br>")
+
+        // Clean up extra breaks
+        .replace(/<br><br>/g, "<br>")
+        .replace(/<\/ul><br><ul[^>]*>/g, "")
+    );
+  }
 
   // Wait for React to be available
   function waitForReact(callback) {
@@ -23,8 +85,17 @@
     const [inputValue, setInputValue] = React.useState("");
     const [isLoading, setIsLoading] = React.useState(false);
     const [isEmbedded, setIsEmbedded] = React.useState(false);
+    const messagesEndRef = React.useRef(null);
 
     const config = window.veronicaChatbotConfig || {};
+
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    React.useEffect(() => {
+      scrollToBottom();
+    }, [messages]);
 
     React.useEffect(() => {
       // Check if this is embedded mode
@@ -69,6 +140,7 @@
           },
           body: JSON.stringify({
             message: text,
+            thread_id: "web_user_" + Date.now(),
             history: messages.slice(-10).map((msg) => ({
               role: msg.sender === "user" ? "user" : "assistant",
               content: msg.text,
@@ -101,9 +173,9 @@
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, errorMessage]);
-      } finally {
-        setIsLoading(false);
       }
+
+      setIsLoading(false);
     };
 
     const handleSubmit = (e) => {
@@ -111,22 +183,12 @@
       sendMessage(inputValue);
     };
 
-    const formatMessage = (text) => {
-      // Simple markdown-like formatting
-      return text
-        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-        .replace(/\*(.*?)\*/g, "<em>$1</em>")
-        .replace(/\n/g, "<br>");
-    };
-
     // Embedded version
     if (isEmbedded) {
       return React.createElement(
         "div",
         {
-          className: `veronica-chatbot-embedded ${
-            config.theme === "dark" ? "dark" : "light"
-          }`,
+          className: "veronica-chatbot-embedded",
           style: {
             width: "100%",
             height: config.height || "500px",
@@ -134,9 +196,10 @@
             borderRadius: "12px",
             display: "flex",
             flexDirection: "column",
-            backgroundColor: config.theme === "dark" ? "#1f2937" : "#ffffff",
+            backgroundColor: config.theme === "dark" ? "#1f2937" : "white",
             fontFamily:
               '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            overflow: "hidden",
           },
         },
         [
@@ -150,81 +213,34 @@
                 borderBottom: "1px solid #e5e7eb",
                 backgroundColor:
                   config.theme === "dark" ? "#374151" : "#f9fafb",
-                borderRadius: "12px 12px 0 0",
+                color: config.theme === "dark" ? "#f9fafb" : "#111827",
               },
             },
             [
               React.createElement(
-                "div",
+                "h3",
                 {
                   key: "title",
+                  style: { margin: 0, fontSize: "18px", fontWeight: "600" },
+                },
+                "💬 Chatta con Veronica"
+              ),
+              React.createElement(
+                "p",
+                {
+                  key: "subtitle",
                   style: {
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
+                    margin: "4px 0 0 0",
+                    fontSize: "14px",
+                    opacity: 0.7,
                   },
                 },
-                [
-                  React.createElement(
-                    "div",
-                    {
-                      key: "avatar",
-                      style: {
-                        width: "32px",
-                        height: "32px",
-                        borderRadius: "50%",
-                        background: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "white",
-                        fontWeight: "bold",
-                        fontSize: "12px",
-                      },
-                    },
-                    "VS"
-                  ),
-                  React.createElement(
-                    "div",
-                    {
-                      key: "info",
-                    },
-                    [
-                      React.createElement(
-                        "h3",
-                        {
-                          key: "name",
-                          style: {
-                            margin: 0,
-                            fontSize: "14px",
-                            fontWeight: "600",
-                            color:
-                              config.theme === "dark" ? "#f9fafb" : "#111827",
-                          },
-                        },
-                        "Veronica Schembri"
-                      ),
-                      React.createElement(
-                        "p",
-                        {
-                          key: "role",
-                          style: {
-                            margin: 0,
-                            fontSize: "12px",
-                            color:
-                              config.theme === "dark" ? "#9ca3af" : "#6b7280",
-                          },
-                        },
-                        "AI Engineer"
-                      ),
-                    ]
-                  ),
-                ]
+                "AI Engineer · Sicilia"
               ),
             ]
           ),
 
-          // Messages area
+          // Messages
           React.createElement(
             "div",
             {
@@ -238,74 +254,63 @@
                 gap: "12px",
               },
             },
-            messages.map((message) =>
-              React.createElement(
-                "div",
-                {
-                  key: message.id,
-                  style: {
-                    display: "flex",
-                    justifyContent:
-                      message.sender === "user" ? "flex-end" : "flex-start",
+            [
+              ...messages.map((message) =>
+                React.createElement(
+                  "div",
+                  {
+                    key: message.id,
+                    style: {
+                      display: "flex",
+                      justifyContent:
+                        message.sender === "user" ? "flex-end" : "flex-start",
+                    },
                   },
-                },
-                React.createElement("div", {
-                  style: {
-                    maxWidth: "80%",
-                    padding: "8px 12px",
-                    borderRadius: "12px",
-                    backgroundColor:
-                      message.sender === "user"
-                        ? "#3b82f6"
-                        : config.theme === "dark"
-                        ? "#374151"
-                        : "#f3f4f6",
-                    color:
-                      message.sender === "user"
-                        ? "white"
-                        : config.theme === "dark"
-                        ? "#f9fafb"
-                        : "#111827",
-                    fontSize: "14px",
-                    lineHeight: "1.4",
+                  React.createElement("div", {
+                    style: {
+                      padding: "12px 16px",
+                      backgroundColor:
+                        message.sender === "user" ? "#3b82f6" : "#f3f4f6",
+                      color: message.sender === "user" ? "white" : "#374151",
+                      borderRadius: "12px",
+                      maxWidth: "85%",
+                      wordWrap: "break-word",
+                      lineHeight: "1.5",
+                    },
+                    dangerouslySetInnerHTML: {
+                      __html: formatMessageText(message.text),
+                    },
+                  })
+                )
+              ),
+              isLoading &&
+                React.createElement(
+                  "div",
+                  {
+                    key: "loading",
+                    style: { display: "flex", justifyContent: "flex-start" },
                   },
-                  dangerouslySetInnerHTML: {
-                    __html: formatMessage(message.text),
-                  },
-                })
-              )
-            )
+                  React.createElement(
+                    "div",
+                    {
+                      style: {
+                        padding: "12px 16px",
+                        backgroundColor: "#f3f4f6",
+                        borderRadius: "12px",
+                        color: "#6b7280",
+                      },
+                    },
+                    "Veronica sta scrivendo..."
+                  )
+                ),
+              React.createElement("div", {
+                key: "end",
+                ref: messagesEndRef,
+              }),
+            ]
           ),
 
-          // Loading indicator
-          isLoading &&
-            React.createElement(
-              "div",
-              {
-                key: "loading",
-                style: {
-                  padding: "16px",
-                  display: "flex",
-                  justifyContent: "flex-start",
-                },
-              },
-              React.createElement(
-                "div",
-                {
-                  style: {
-                    padding: "8px 12px",
-                    backgroundColor:
-                      config.theme === "dark" ? "#374151" : "#f3f4f6",
-                    borderRadius: "12px",
-                    fontSize: "14px",
-                    color: config.theme === "dark" ? "#f9fafb" : "#111827",
-                  },
-                },
-                "🤔 Sto pensando..."
-              )
-            ),
-
-          // Input area
+          // Input
           React.createElement(
             "form",
             {
@@ -314,6 +319,7 @@
               style: {
                 padding: "16px",
                 borderTop: "1px solid #e5e7eb",
+                backgroundColor: config.theme === "dark" ? "#374151" : "white",
                 display: "flex",
                 gap: "8px",
               },
@@ -332,8 +338,9 @@
                   border: "1px solid #d1d5db",
                   borderRadius: "8px",
                   fontSize: "14px",
+                  outline: "none",
                   backgroundColor:
-                    config.theme === "dark" ? "#374151" : "white",
+                    config.theme === "dark" ? "#4b5563" : "white",
                   color: config.theme === "dark" ? "#f9fafb" : "#111827",
                 },
               }),
@@ -437,85 +444,41 @@
                     padding: "16px",
                     backgroundColor:
                       config.theme === "dark" ? "#374151" : "#f9fafb",
-                    borderBottom: "1px solid #e5e7eb",
+                    borderBottom: isMinimized ? "none" : "1px solid #e5e7eb",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
+                    color: config.theme === "dark" ? "#f9fafb" : "#111827",
                   },
                 },
                 [
-                  React.createElement(
-                    "div",
-                    {
-                      key: "header-info",
-                      style: {
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
+                  React.createElement("div", { key: "header-info" }, [
+                    React.createElement(
+                      "h4",
+                      {
+                        key: "header-title",
+                        style: {
+                          margin: 0,
+                          fontSize: "16px",
+                          fontWeight: "600",
+                        },
                       },
-                    },
-                    [
+                      "💬 Veronica Schembri"
+                    ),
+                    !isMinimized &&
                       React.createElement(
-                        "div",
+                        "p",
                         {
-                          key: "header-avatar",
+                          key: "header-subtitle",
                           style: {
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "50%",
-                            background:
-                              "linear-gradient(135deg, #3b82f6, #8b5cf6)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "white",
-                            fontWeight: "bold",
+                            margin: "2px 0 0 0",
                             fontSize: "12px",
+                            opacity: 0.7,
                           },
                         },
-                        "VS"
+                        "AI Engineer · Online"
                       ),
-                      React.createElement(
-                        "div",
-                        {
-                          key: "header-text",
-                        },
-                        [
-                          React.createElement(
-                            "h3",
-                            {
-                              key: "header-name",
-                              style: {
-                                margin: 0,
-                                fontSize: "14px",
-                                fontWeight: "600",
-                                color:
-                                  config.theme === "dark"
-                                    ? "#f9fafb"
-                                    : "#111827",
-                              },
-                            },
-                            "Veronica Schembri"
-                          ),
-                          React.createElement(
-                            "p",
-                            {
-                              key: "header-role",
-                              style: {
-                                margin: 0,
-                                fontSize: "12px",
-                                color:
-                                  config.theme === "dark"
-                                    ? "#9ca3af"
-                                    : "#6b7280",
-                              },
-                            },
-                            "AI Engineer"
-                          ),
-                        ]
-                      ),
-                    ]
-                  ),
+                  ]),
                   React.createElement(
                     "div",
                     {
@@ -533,13 +496,12 @@
                             border: "none",
                             fontSize: "16px",
                             cursor: "pointer",
-                            padding: "4px",
-                            borderRadius: "4px",
+                            opacity: 0.7,
                             color:
-                              config.theme === "dark" ? "#9ca3af" : "#6b7280",
+                              config.theme === "dark" ? "#f9fafb" : "#111827",
                           },
                         },
-                        isMinimized ? "🔼" : "🔽"
+                        isMinimized ? "⬆️" : "⬇️"
                       ),
                       React.createElement(
                         "button",
@@ -551,10 +513,9 @@
                             border: "none",
                             fontSize: "16px",
                             cursor: "pointer",
-                            padding: "4px",
-                            borderRadius: "4px",
+                            opacity: 0.7,
                             color:
-                              config.theme === "dark" ? "#9ca3af" : "#6b7280",
+                              config.theme === "dark" ? "#f9fafb" : "#111827",
                           },
                         },
                         "✕"
@@ -564,9 +525,8 @@
                 ]
               ),
 
-              // Chat content (only show if not minimized)
-              !isMinimized && [
-                // Messages
+              // Messages (hidden when minimized)
+              !isMinimized &&
                 React.createElement(
                   "div",
                   {
@@ -580,77 +540,72 @@
                       gap: "12px",
                     },
                   },
-                  messages.map((message) =>
-                    React.createElement(
-                      "div",
-                      {
-                        key: message.id,
-                        style: {
-                          display: "flex",
-                          justifyContent:
-                            message.sender === "user"
-                              ? "flex-end"
-                              : "flex-start",
+                  [
+                    ...messages.map((message) =>
+                      React.createElement(
+                        "div",
+                        {
+                          key: message.id,
+                          style: {
+                            display: "flex",
+                            justifyContent:
+                              message.sender === "user"
+                                ? "flex-end"
+                                : "flex-start",
+                          },
                         },
-                      },
-                      React.createElement("div", {
-                        style: {
-                          maxWidth: "80%",
-                          padding: "8px 12px",
-                          borderRadius: "12px",
-                          backgroundColor:
-                            message.sender === "user"
-                              ? "#3b82f6"
-                              : config.theme === "dark"
-                              ? "#374151"
-                              : "#f3f4f6",
-                          color:
-                            message.sender === "user"
-                              ? "white"
-                              : config.theme === "dark"
-                              ? "#f9fafb"
-                              : "#111827",
-                          fontSize: "14px",
-                          lineHeight: "1.4",
+                        React.createElement("div", {
+                          style: {
+                            padding: "10px 14px",
+                            backgroundColor:
+                              message.sender === "user" ? "#3b82f6" : "#f3f4f6",
+                            color:
+                              message.sender === "user" ? "white" : "#374151",
+                            borderRadius: "12px",
+                            maxWidth: "85%",
+                            wordWrap: "break-word",
+                            fontSize: "14px",
+                            lineHeight: "1.5",
+                          },
+                          dangerouslySetInnerHTML: {
+                            __html: formatMessageText(message.text),
+                          },
+                        })
+                      )
+                    ),
+                    isLoading &&
+                      React.createElement(
+                        "div",
+                        {
+                          key: "loading",
+                          style: {
+                            display: "flex",
+                            justifyContent: "flex-start",
+                          },
                         },
-                        dangerouslySetInnerHTML: {
-                          __html: formatMessage(message.text),
-                        },
-                      })
-                    )
-                  )
+                        React.createElement(
+                          "div",
+                          {
+                            style: {
+                              padding: "10px 14px",
+                              backgroundColor: "#f3f4f6",
+                              borderRadius: "12px",
+                              color: "#6b7280",
+                              fontSize: "14px",
+                            },
+                          },
+                          "Veronica sta scrivendo..."
+                        )
+                      ),
+                    React.createElement("div", {
+                      key: "end",
+                      ref: messagesEndRef,
+                    }),
+                  ]
                 ),
 
-                // Loading
-                isLoading &&
-                  React.createElement(
-                    "div",
-                    {
-                      key: "chat-loading",
-                      style: {
-                        padding: "0 16px 16px",
-                        display: "flex",
-                        justifyContent: "flex-start",
-                      },
-                    },
-                    React.createElement(
-                      "div",
-                      {
-                        style: {
-                          padding: "8px 12px",
-                          backgroundColor:
-                            config.theme === "dark" ? "#374151" : "#f3f4f6",
-                          borderRadius: "12px",
-                          fontSize: "14px",
-                          color:
-                            config.theme === "dark" ? "#f9fafb" : "#111827",
-                        },
-                      },
-                      "🤔 Sto pensando..."
-                    )
-                  ),
-
-                // Input
+              // Input (hidden when minimized)
+              !isMinimized &&
                 React.createElement(
                   "form",
                   {
@@ -659,6 +614,8 @@
                     style: {
                       padding: "16px",
                       borderTop: "1px solid #e5e7eb",
+                      backgroundColor:
+                        config.theme === "dark" ? "#374151" : "white",
                       display: "flex",
                       gap: "8px",
                     },
@@ -677,8 +634,9 @@
                         border: "1px solid #d1d5db",
                         borderRadius: "8px",
                         fontSize: "14px",
+                        outline: "none",
                         backgroundColor:
-                          config.theme === "dark" ? "#374151" : "white",
+                          config.theme === "dark" ? "#4b5563" : "white",
                         color: config.theme === "dark" ? "#f9fafb" : "#111827",
                       },
                     }),
@@ -706,7 +664,6 @@
                     ),
                   ]
                 ),
-              ],
             ]
           ),
       ]
