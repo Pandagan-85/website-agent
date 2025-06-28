@@ -620,8 +620,8 @@ def get_contact_info() -> str:
     return json.dumps({
         "contacts": {
             "website": "https://www.veronicaschembri.com",
-            "email": "Contattami tramite il sito web",
-            "linkedin": "Cerca 'Veronica Schembri' su LinkedIn",
+            "email": "veronicaschembri@gmail.com",
+            "linkedin": "https://www.linkedin.com/in/veronicaschembri/",
             "location": "Palermo, Sicilia",
             "availability": "Aperta a collaborazioni e progetti interessanti nel campo AI/ML"
         },
