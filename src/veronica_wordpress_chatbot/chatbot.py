@@ -1052,6 +1052,15 @@ def quick_wordpress_test():
             print(f"❌ {name}: Error - {e}")
 
 
+# Export per LangGraph Studio
+def get_graph():
+    """Funzione di export per LangGraph Studio"""
+    return create_graph()
+
+
+# Alias per compatibilità
+graph = get_graph()
+
 if __name__ == "__main__":
     # Setup environment variables
     from dotenv import load_dotenv

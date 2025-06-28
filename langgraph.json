@@ -1,0 +1,23 @@
+{
+  "graphs": {
+    "veronica_chatbot": {
+      "path": "src.veronica_wordpress_chatbot.chatbot:create_graph",
+      "config_schema": "src.veronica_wordpress_chatbot.chatbot:Configuration"
+    }
+  },
+  "env": ".env",
+  "python_version": "3.11",
+  "dependencies": [
+    "fastapi>=0.115.14",
+    "uvicorn>=0.34.3",
+    "langchain>=0.3.26",
+    "langchain-openai>=0.3.27",
+    "langgraph>=0.5.0",
+    "langsmith>=0.4.4",
+    "openai>=1.93.0",
+    "requests>=2.32.4",
+    "beautifulsoup4>=4.13.4",
+    "python-dotenv>=1.1.1",
+    "pydantic>=2.11.7"
+  ]
+}
