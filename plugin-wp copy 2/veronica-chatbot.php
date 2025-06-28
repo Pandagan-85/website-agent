@@ -293,8 +293,16 @@ class VeronicaChatbotPlugin {
                     <tr>
                         <th scope="row"><?php _e('Initial Message', 'veronica-chatbot'); ?></th>
                         <td>
-                            <textarea name="initial_message" class="large-text" rows="3" maxlength="500"><?php 
-                                echo esc_textarea($settings['initial_message'] ?? 'Ciao! Sono Veronica Schembri, AI Engineer e Data Scientist. Come posso aiutarti oggi?'); 
+                            <textarea name="initial_message" class="large-text" rows="5" maxlength="500"><?php 
+                                echo esc_textarea($settings['initial_message'] ?? 'Ciao! Sono Veronica Schembri, AI Engineer da Palermo. 
+
+**Puoi chiedermi:**
+• I miei **progetti AI** e certificazioni
+• Il mio **ultimo articolo** del blog  
+• Le **tecnologie** che utilizzo
+• Come **collaborare** insieme
+
+Cosa ti interessa di più?'); 
                             ?></textarea>
                             <p class="description"><?php _e('First message shown to users (max 500 caratteri)', 'veronica-chatbot'); ?></p>
                         </td>

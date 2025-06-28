@@ -1007,7 +1007,7 @@
                             opacity: 0.7,
                           },
                         },
-                        "AI Engineer · XSS Protected"
+                        "AI Engineer · Super Nerd"
                       ),
                   ]),
                   React.createElement(
