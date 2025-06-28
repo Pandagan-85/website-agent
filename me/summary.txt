@@ -1,0 +1,13 @@
+Passione per Intelligenza Artificiale, Automazione e Tecnologia.
+
+Attualmente sto costruendo la mia carriera come AI Engineer, approfondendo le mie competenze in Machine Learning, LLM e automazione intelligente. Ho studiato tecniche di data preprocessing, feature engineering e model deployment, applicando algoritmi supervisionati e non supervisionati con strumenti come Pandas, NumPy, TensorFlow e Scikit-Learn. Ho creato pipeline di elaborazione dati, modelli predittivi e soluzioni che automatizzano processi reali, combinando analisi, logica e creatività.
+
+Mi sto avvicinando al mondo dei Large Language Models e alla creazione di agenti AI, con l’obiettivo di sviluppare funzioni e script intelligenti capaci di migliorare l’efficienza e la scalabilità dei flussi di lavoro. Inoltre, sto per iniziare lo studio di AWS e Docker per acquisire competenze nel deployment e nella gestione di applicazioni su larga scala.
+
+Il mio percorso tecnico parte dallo sviluppo Front-End: ho lavorato con JavaScript e React per creare interfacce moderne, esplorando anche WordPress in modalità Headless. Questa evoluzione nasce da una passione costante per l’ordine, l’organizzazione e la struttura, presente fin dai miei inizi come illustratrice e graphic designer, dove utilizzavo template, sistemi di stili e griglie per ottimizzare il design e la comunicazione visiva.
+
+Con la programmazione ho trovato lo stesso approccio: componenti riutilizzabili, sistemi modulari, logiche pulite. È stato naturale arrivare a Python, dove oggi applico questi principi alla Data Science e all’AI.
+
+Utilizzo strumenti come Cursor (sviluppo assistito da AI) e Obsidian (sistema di gestione della conoscenza personale) per organizzare pensieri, progetti e conoscenze. Amo imparare ogni giorno, risolvere problemi reali e lavorare in team orientati alla condivisione e alla crescita.
+
+Sono una super Nerd, fan di serie TV, fumetti e Magic: The Gathering, con una debolezza per i Lego (fortunatamente bilanciata da una moglie fantastica che mi tiene con i piedi per terra!).
