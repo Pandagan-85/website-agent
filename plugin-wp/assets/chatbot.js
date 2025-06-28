@@ -6,6 +6,21 @@
 (function () {
   "use strict";
 
+  // Inject mobile CSS
+  if (!document.getElementById("veronica-chatbot-mobile-css")) {
+    const style = document.createElement("style");
+    style.id = "veronica-chatbot-mobile-css";
+    style.textContent = `
+        @media (max-width: 768px) {
+            .veronica-chatbot-floating {
+                left: 20px !important;
+                right: 20px !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+  }
+
   // Markdown formatting function
   function formatMessageText(text) {
     if (!text) return "";
@@ -32,7 +47,7 @@
         // Links
         .replace(
           /\[([^\]]+)\]\(([^)]+)\)/g,
-          '<a href="$2" target="_blank" style="color: #3b82f6; text-decoration: underline;">$1</a>'
+          '<a href="$2" target="_blank" style="color: #f66061; text-decoration: underline;">$1</a>'
         )
 
         // Handle lists
@@ -270,7 +285,7 @@
                     style: {
                       padding: "12px 16px",
                       backgroundColor:
-                        message.sender === "user" ? "#3b82f6" : "#f3f4f6",
+                        message.sender === "user" ? "#f66061" : "#f3f4f6",
                       color: message.sender === "user" ? "white" : "#374151",
                       borderRadius: "12px",
                       maxWidth: "85%",
@@ -352,7 +367,7 @@
                   disabled: !inputValue.trim() || isLoading,
                   style: {
                     padding: "8px 16px",
-                    backgroundColor: "#3b82f6",
+                    backgroundColor: "#f66061",
                     color: "white",
                     border: "none",
                     borderRadius: "8px",
@@ -380,8 +395,19 @@
         style: {
           position: "fixed",
           bottom: "20px",
-          right: config.position === "bottom-left" ? "auto" : "20px",
-          left: config.position === "bottom-left" ? "20px" : "auto",
+          // Mobile-first positioning
+          right:
+            window.innerWidth <= 768
+              ? "20px"
+              : config.position === "bottom-left"
+              ? "auto"
+              : "20px",
+          left:
+            window.innerWidth <= 768
+              ? "20px"
+              : config.position === "bottom-left"
+              ? "20px"
+              : "auto",
           zIndex: 999999,
         },
       },
@@ -397,7 +423,7 @@
                 width: "60px",
                 height: "60px",
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
+                background: "linear-gradient(135deg, #f66061, #8b5cf6)",
                 border: "none",
                 color: "white",
                 fontSize: "24px",
@@ -414,34 +440,48 @@
             "💬"
           ),
 
-        // Chat window
+        // Chat window - MOBILE RESPONSIVE
         isOpen &&
           React.createElement(
             "div",
             {
               key: "chat",
               style: {
-                width: "380px",
-                height: isMinimized ? "60px" : "500px",
+                // Responsive width
+                width:
+                  window.innerWidth <= 768
+                    ? "calc(100vw - 40px)" // Mobile: schermo - 40px (20px per lato)
+                    : "380px", // Desktop: width fissa
+                maxWidth: "400px", // Limite massimo
+                height: isMinimized
+                  ? "60px"
+                  : window.innerWidth <= 768
+                  ? "70vh"
+                  : "500px", // Mobile più basso
                 backgroundColor: config.theme === "dark" ? "#1f2937" : "white",
                 borderRadius: "12px",
                 boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",
                 display: "flex",
                 flexDirection: "column",
                 overflow: "hidden",
-                transition: "height 0.3s ease",
+                transition: "height 0.3s ease, width 0.3s ease",
                 fontFamily:
                   '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                // Mobile specific adjustments
+                ...(window.innerWidth <= 768 && {
+                  position: "relative",
+                  margin: "0 auto",
+                }),
               },
             },
             [
-              // Chat header
+              // Chat header - MOBILE RESPONSIVE
               React.createElement(
                 "div",
                 {
                   key: "chat-header",
                   style: {
-                    padding: "16px",
+                    padding: window.innerWidth <= 768 ? "12px 16px" : "16px", // Mobile: padding ridotto
                     backgroundColor:
                       config.theme === "dark" ? "#374151" : "#f9fafb",
                     borderBottom: isMinimized ? "none" : "1px solid #e5e7eb",
@@ -459,7 +499,7 @@
                         key: "header-title",
                         style: {
                           margin: 0,
-                          fontSize: "16px",
+                          fontSize: window.innerWidth <= 768 ? "15px" : "16px", // Mobile: font più piccolo
                           fontWeight: "600",
                         },
                       },
@@ -472,7 +512,8 @@
                           key: "header-subtitle",
                           style: {
                             margin: "2px 0 0 0",
-                            fontSize: "12px",
+                            fontSize:
+                              window.innerWidth <= 768 ? "11px" : "12px", // Mobile: font più piccolo
                             opacity: 0.7,
                           },
                         },
@@ -494,11 +535,14 @@
                           style: {
                             background: "none",
                             border: "none",
-                            fontSize: "16px",
+                            fontSize:
+                              window.innerWidth <= 768 ? "14px" : "16px", // Mobile: icone più piccole
                             cursor: "pointer",
                             opacity: 0.7,
                             color:
                               config.theme === "dark" ? "#f9fafb" : "#111827",
+                            minWidth: "24px",
+                            height: "24px",
                           },
                         },
                         isMinimized ? "⬆️" : "⬇️"
@@ -511,11 +555,14 @@
                           style: {
                             background: "none",
                             border: "none",
-                            fontSize: "16px",
+                            fontSize:
+                              window.innerWidth <= 768 ? "14px" : "16px", // Mobile: icone più piccole
                             cursor: "pointer",
                             opacity: 0.7,
                             color:
                               config.theme === "dark" ? "#f9fafb" : "#111827",
+                            minWidth: "24px",
+                            height: "24px",
                           },
                         },
                         "✕"
@@ -525,7 +572,7 @@
                 ]
               ),
 
-              // Messages (hidden when minimized)
+              // Messages - MOBILE RESPONSIVE
               !isMinimized &&
                 React.createElement(
                   "div",
@@ -534,10 +581,10 @@
                     style: {
                       flex: 1,
                       overflowY: "auto",
-                      padding: "16px",
+                      padding: window.innerWidth <= 768 ? "12px" : "16px", // Mobile: padding ridotto
                       display: "flex",
                       flexDirection: "column",
-                      gap: "12px",
+                      gap: window.innerWidth <= 768 ? "8px" : "12px", // Mobile: gap ridotto
                     },
                   },
                   [
@@ -556,15 +603,19 @@
                         },
                         React.createElement("div", {
                           style: {
-                            padding: "10px 14px",
+                            padding:
+                              window.innerWidth <= 768
+                                ? "8px 12px"
+                                : "10px 14px", // Mobile: padding ridotto
                             backgroundColor:
-                              message.sender === "user" ? "#3b82f6" : "#f3f4f6",
+                              message.sender === "user" ? "#f66061" : "#f3f4f6",
                             color:
                               message.sender === "user" ? "white" : "#374151",
                             borderRadius: "12px",
-                            maxWidth: "85%",
+                            maxWidth: window.innerWidth <= 768 ? "90%" : "85%", // Mobile: più largo
                             wordWrap: "break-word",
-                            fontSize: "14px",
+                            fontSize:
+                              window.innerWidth <= 768 ? "13px" : "14px", // Mobile: font più piccolo
                             lineHeight: "1.5",
                           },
                           dangerouslySetInnerHTML: {
@@ -587,11 +638,15 @@
                           "div",
                           {
                             style: {
-                              padding: "10px 14px",
+                              padding:
+                                window.innerWidth <= 768
+                                  ? "8px 12px"
+                                  : "10px 14px",
                               backgroundColor: "#f3f4f6",
                               borderRadius: "12px",
                               color: "#6b7280",
-                              fontSize: "14px",
+                              fontSize:
+                                window.innerWidth <= 768 ? "13px" : "14px",
                             },
                           },
                           "Veronica sta scrivendo..."
@@ -604,7 +659,7 @@
                   ]
                 ),
 
-              // Input (hidden when minimized)
+              // Input - MOBILE RESPONSIVE
               !isMinimized &&
                 React.createElement(
                   "form",
@@ -612,7 +667,7 @@
                     key: "chat-form",
                     onSubmit: handleSubmit,
                     style: {
-                      padding: "16px",
+                      padding: window.innerWidth <= 768 ? "12px" : "16px", // Mobile: padding ridotto
                       borderTop: "1px solid #e5e7eb",
                       backgroundColor:
                         config.theme === "dark" ? "#374151" : "white",
@@ -630,10 +685,11 @@
                       disabled: isLoading,
                       style: {
                         flex: 1,
-                        padding: "8px 12px",
+                        padding:
+                          window.innerWidth <= 768 ? "8px 10px" : "8px 12px", // Mobile: padding ridotto
                         border: "1px solid #d1d5db",
                         borderRadius: "8px",
-                        fontSize: "14px",
+                        fontSize: window.innerWidth <= 768 ? "16px" : "14px", // Mobile: 16px previene zoom su iOS
                         outline: "none",
                         backgroundColor:
                           config.theme === "dark" ? "#4b5563" : "white",
@@ -647,17 +703,19 @@
                         type: "submit",
                         disabled: !inputValue.trim() || isLoading,
                         style: {
-                          padding: "8px 16px",
-                          backgroundColor: "#3b82f6",
+                          padding:
+                            window.innerWidth <= 768 ? "8px 12px" : "8px 16px", // Mobile: padding ridotto
+                          backgroundColor: "#f66061",
                           color: "white",
                           border: "none",
                           borderRadius: "8px",
-                          fontSize: "14px",
+                          fontSize: window.innerWidth <= 768 ? "13px" : "14px",
                           cursor:
                             !inputValue.trim() || isLoading
                               ? "not-allowed"
                               : "pointer",
                           opacity: !inputValue.trim() || isLoading ? 0.6 : 1,
+                          minWidth: window.innerWidth <= 768 ? "40px" : "auto", // Mobile: larghezza minima
                         },
                       },
                       "💬"
