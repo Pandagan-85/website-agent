@@ -11,19 +11,148 @@
   // =====================================
 
   const CHATBOT_CONFIG = {
-    SESSION_DURATION: 7 * 24 * 60 * 60 * 1000, // 7 giorni
-    CONVERSATION_TIMEOUT: 24 * 60 * 60 * 1000, // 24 ore inattività
-    MAX_MESSAGES: 100, // Limite messaggi in memoria
+    SESSION_DURATION: 7 * 24 * 60 * 60 * 1000,
+    CONVERSATION_TIMEOUT: 24 * 60 * 60 * 1000,
+    MAX_MESSAGES: 100,
     STORAGE_KEYS: {
       SESSION: "veronica_chatbot_session",
       MESSAGES: "veronica_chatbot_messages",
       UI_STATE: "veronica_chatbot_ui_state",
     },
     API: {
-      ENDPOINT: window.veronicaChatbotConfig?.apiUrl || "/chat",
+      ENDPOINT: getValidAPIEndpoint(), // ← SOLUZIONE
       TIMEOUT: 30000,
     },
   };
+  // 🎯 FUNZIONE PER OTTENERE ENDPOINT VALIDO
+  function getValidAPIEndpoint() {
+    // Debug: vedi cosa abbiamo
+    console.log("🔍 Config debug:", {
+      wpConfig: window.veronicaChatbotConfig,
+      apiUrl: window.veronicaChatbotConfig?.apiUrl,
+      currentHost: window.location.hostname,
+      currentProtocol: window.location.protocol,
+    });
+
+    const configUrl = window.veronicaChatbotConfig?.apiUrl;
+
+    // Se abbiamo un URL configurato, validalo
+    if (configUrl) {
+      try {
+        // Se è già assoluto, usalo
+        if (
+          configUrl.startsWith("http://") ||
+          configUrl.startsWith("https://")
+        ) {
+          console.log("✅ Using configured absolute URL:", configUrl);
+          return configUrl;
+        }
+
+        // Se è relativo, costruisci URL assoluto
+        if (configUrl.startsWith("/")) {
+          const absoluteUrl = window.location.origin + configUrl;
+          console.log(
+            "🔧 Converted relative to absolute:",
+            configUrl,
+            "→",
+            absoluteUrl
+          );
+          return absoluteUrl;
+        }
+
+        // Se non ha protocollo, aggiungi quello corrente
+        const withProtocol = `${window.location.protocol}//${configUrl}`;
+        console.log("🔧 Added protocol:", configUrl, "→", withProtocol);
+        return withProtocol;
+      } catch (error) {
+        console.error("❌ Invalid API URL format:", configUrl, error);
+      }
+    }
+
+    // FALLBACK SICURI (in ordine di preferenza)
+    const fallbacks = [
+      // 1. Prova stesso dominio + /chat
+      `${window.location.origin}/chat`,
+
+      // 2. Se siamo su localhost, prova porta 8000
+      window.location.hostname === "localhost"
+        ? "http://localhost:8000/chat"
+        : null,
+
+      // 3. Se siamo su un subdominio, prova dominio principale
+      window.location.hostname.includes(".")
+        ? `${window.location.protocol}//${window.location.hostname
+            .split(".")
+            .slice(-2)
+            .join(".")}/chat`
+        : null,
+
+      // 4. Ultimo fallback: errore esplicito
+      null,
+    ].filter(Boolean);
+
+    for (const fallback of fallbacks) {
+      console.warn(`⚠️ Trying fallback API URL: ${fallback}`);
+      return fallback;
+    }
+
+    // Se arriviamo qui, c'è un problema grave
+    console.error("❌ No valid API endpoint found!");
+
+    // Mostra errore visibile all'utente
+    showAPIConfigError();
+
+    return null;
+  }
+
+  // 🚨 MOSTRA ERRORE CONFIGURAZIONE
+  function showAPIConfigError() {
+    const errorDiv = document.createElement("div");
+    errorDiv.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #fecaca;
+    font-family: sans-serif;
+    font-size: 14px;
+    z-index: 999999;
+    max-width: 350px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  `;
+
+    errorDiv.innerHTML = `
+    <div style="font-size: 24px; margin-bottom: 12px;">⚠️</div>
+    <strong>Chatbot Configuration Error</strong><br><br>
+    L'URL dell'API non è configurato.<br><br>
+    <strong>Per l'amministratore:</strong><br>
+    Vai su <em>WordPress Admin → Impostazioni → Veronica Chatbot</em><br>
+    e configura l'URL API corretto.<br><br>
+    <button onclick="this.parentElement.remove()" style="
+      background: #dc2626; 
+      color: white; 
+      border: none; 
+      padding: 8px 16px; 
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    ">Chiudi</button>
+  `;
+
+    document.body.appendChild(errorDiv);
+
+    // Auto-remove dopo 15 secondi
+    setTimeout(() => {
+      if (errorDiv.parentElement) {
+        errorDiv.remove();
+      }
+    }, 15000);
+  }
 
   // =====================================
   // GESTIONE SESSIONI E STORAGE
@@ -538,15 +667,41 @@
     const [error, setError] = React.useState("");
 
     // Configurazione
-    const config = React.useMemo(
-      () => ({
+    const config = React.useMemo(() => {
+      const apiUrl = getValidAPIEndpoint();
+
+      if (!apiUrl) {
+        console.error("❌ Cannot initialize chatbot without valid API URL");
+        return null;
+      }
+
+      return {
         theme: window.veronicaChatbotConfig?.theme || "light",
         position: window.veronicaChatbotConfig?.position || "bottom-right",
-        apiUrl:
-          window.veronicaChatbotConfig?.apiUrl || CHATBOT_CONFIG.API.ENDPOINT,
-      }),
-      []
-    );
+        apiUrl: apiUrl,
+      };
+    }, []);
+
+    // Se non abbiamo config valida, non renderizzare
+    if (!config) {
+      return React.createElement(
+        "div",
+        {
+          style: {
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            background: "#fee2e2",
+            color: "#dc2626",
+            padding: "12px",
+            borderRadius: "8px",
+            fontSize: "12px",
+            zIndex: 999999,
+          },
+        },
+        "❌ Chatbot: URL API non configurato"
+      );
+    }
 
     // ===== PERSISTENZA UI STATE =====
     const updateUIState = React.useCallback(
@@ -604,25 +759,52 @@
         try {
           storageManager.updateSessionActivity();
 
+          // 🔍 DEBUG DETTAGLIATO
+          console.group("🔗 API Request Debug");
+          console.log("API URL:", config.apiUrl);
+          console.log("Message:", sanitizedMessage);
+          console.log("Thread ID:", session.sessionId);
+          console.log("Request timestamp:", new Date().toISOString());
+
+          const requestBody = {
+            message: sanitizedMessage,
+            thread_id: session.sessionId,
+          };
+
+          console.log("Request body:", requestBody);
+
           const response = await fetch(config.apiUrl, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              message: sanitizedMessage,
-              thread_id: session.sessionId,
-            }),
+            body: JSON.stringify(requestBody),
             signal: AbortSignal.timeout(CHATBOT_CONFIG.API.TIMEOUT),
           });
 
+          console.log("Response received:");
+          console.log("- Status:", response.status);
+          console.log("- Status Text:", response.statusText);
+          console.log("- OK:", response.ok);
+          console.log(
+            "- Headers:",
+            Object.fromEntries(response.headers.entries())
+          );
+          console.log("- URL:", response.url);
+          console.groupEnd();
+
           if (!response.ok) {
-            throw new Error(`Errore HTTP: ${response.status}`);
+            const errorText = await response.text();
+            console.error("❌ API Error Response:", errorText);
+            throw new Error(
+              `HTTP ${response.status}: ${response.statusText}\n${errorText}`
+            );
           }
 
           const data = await response.json();
+          console.log("✅ API Response data:", data);
 
-          // ✅ FIX: Non marcare come processato qui - lascia che ChatStorageManager se ne occupi
+          // Aggiungi risposta bot
           addMessage({
             type: "bot",
             content:
@@ -632,13 +814,46 @@
             sender: "bot",
           });
         } catch (error) {
-          console.error("❌ Errore invio messaggio:", error);
+          console.group("❌ Error Details");
+          console.error("Error name:", error.name);
+          console.error("Error message:", error.message);
+          console.error("Error stack:", error.stack);
+          console.error("Error cause:", error.cause);
+          console.groupEnd();
 
-          let errorMessage = "Ops! Qualcosa è andato storto. Riprova tra poco.";
-          if (error.name === "TimeoutError") {
-            errorMessage = "La richiesta ha impiegato troppo tempo. Riprova.";
+          // 🎯 GESTIONE ERRORI SPECIFICA
+          let errorMessage = "Ops! Qualcosa è andato storto.";
+
+          if (error.name === "TimeoutError" || error.name === "AbortError") {
+            errorMessage =
+              "⏱️ Timeout: la richiesta ha impiegato troppo tempo. Il server potrebbe essere lento.";
           } else if (error.name === "TypeError") {
-            errorMessage = "Problema di connessione. Controlla la tua rete.";
+            if (error.message.includes("fetch")) {
+              errorMessage = `🌐 Errore di rete: ${error.message}. Verifica la connessione e l'URL API.`;
+            } else if (error.message.includes("JSON")) {
+              errorMessage =
+                "📄 Il server ha restituito una risposta non valida (non JSON).";
+            } else if (error.message.includes("CORS")) {
+              errorMessage =
+                "🔒 Errore CORS: il server non permette richieste da questo dominio.";
+            } else {
+              errorMessage = `🔧 Errore tecnico: ${error.message}`;
+            }
+          } else if (error.message.includes("HTTP")) {
+            if (error.message.includes("404")) {
+              errorMessage =
+                "🔍 Endpoint non trovato (404). Verifica l'URL API nelle impostazioni.";
+            } else if (error.message.includes("500")) {
+              errorMessage =
+                "⚠️ Errore interno del server (500). Il backend ha un problema.";
+            } else if (error.message.includes("403")) {
+              errorMessage =
+                "🚫 Accesso negato (403). Problema di autenticazione.";
+            } else {
+              errorMessage = `🔗 Errore server: ${error.message}`;
+            }
+          } else {
+            errorMessage = `⚠️ Errore imprevisto: ${error.message}`;
           }
 
           addMessage({
