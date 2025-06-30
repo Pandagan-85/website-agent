@@ -14,6 +14,9 @@
 
 Il **Veronica Schembri WordPress Chatbot** è un assistente AI avanzato che rappresenta professionalmente Veronica Schembri sul suo sito web. Utilizza il pattern **ReAct (Reasoning-Acting)** di LangGraph per fornire informazioni accurate sui progetti, articoli, certificazioni e competenze, sempre basandosi sui contenuti reali del sito WordPress.
 
+🎬 Demo Live
+🌐 Prova il chatbot: [www.veronicaschembri.com](https://www.veronicaschembri.com/)
+
 ### 🎯 Caratteristiche Principali
 
 - **🧠 AI Reasoning Avanzato**: Pattern ReAct con LangGraph per decisioni intelligenti
@@ -681,143 +684,6 @@ POST /wp-json/veronica-chatbot/v1/stats/update
 
 ---
 
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**❌ WordPress API Error**:
-
-```bash
-# Test manuale endpoint
-curl https://www.veronicaschembri.com/wp-json/wp/v2/posts?per_page=1
-```
-
-**❌ Tools Not Called**:
-
-- Verifica system prompt
-- Check LangSmith traces
-- Debug con `/debug/tools`
-
-### Problemi Persistenza
-
-**❌ Conversazioni non persistono:**
-
-```bash
-# Debug storage
-VeronicaChatbotDebug.showStorageStats()
-
-# Check quota localStorage
-VeronicaChatbotDebug.showSessionInfo()
-
-# Reset se necessario
-VeronicaChatbotDebug.hardReset()
-```
-
-**❌ Sync cross-page non funziona:**
-
-- Verifica `enable_cross_page_sync: true` in settings
-- Check same origin policy tra pagine
-- Controlla console per errori storage events
-
-### Problemi Sicurezza
-
-**❌ Messaggi bloccati erroneamente:**
-
-- Disabilita temporaneamente validation strict
-- Check console per pattern XSS detection
-- Verifica input per caratteri speciali problematici
-
-**❌ Frontend Not Loading**:
-
-- Hard refresh cache (`Ctrl+F5`)
-- Check browser console errors
-- Verify plugin activation
-- Test con debug mode attivo
-
-### Debug Commands
-
-```bash
-# Test all components
-python chatbot.py --full-test
-
-# Health check con sicurezza
-curl http://localhost:8000/health
-
-# WordPress connection
-curl http://localhost:8000/wordpress/test
-```
-
----
-
-## 🔄 Migration Guide
-
-### Da Versione < 2.1.0
-
-1. **Backup Esistente**:
-
-   ```javascript
-   VeronicaChatbotDebug.exportData(); // Se disponibile
-   ```
-
-2. **Update Plugin**:
-
-   - Upload nuovo plugin WordPress v2.1
-   - Attiva e configura nuove opzioni persistenza e sicurezza
-
-3. **Test Features**:
-
-   - Verifica cross-page sync
-   - Test session persistence
-   - Check mobile responsive
-   - Validate security protection
-
-4. **Production Deploy**:
-   - Disabilita debug mode
-   - Configura session duration appropriato
-   - Monitor storage usage iniziale
-   - Review security logs
-
----
-
-## 🤝 Contributing
-
-### Development Setup
-
-```bash
-# Setup dev environment
-uv venv
-source .venv/bin/activate
-uv pip install -e ".[dev]"
-
-# Code formatting
-black .
-isort .
-
-# Type checking
-mypy .
-
-# Security checks
-bandit -r .
-```
-
-### Pull Request Process
-
-1. **Fork** il repository
-2. **Create feature branch**: `git checkout -b feature/amazing-feature`
-3. **Test security**: Verify XSS protection e input validation
-4. **Test persistence**: Check cross-page sync e storage
-5. **Commit changes**: `git commit -m 'Add amazing feature'`
-6. **Push branch**: `git push origin feature/amazing-feature`
-7. **Open Pull Request**
-
----
-
-## 📄 License
-
-Questo progetto è rilasciato sotto licenza **MIT**. Vedi il file [LICENSE](LICENSE) per i dettagli.
-
----
-
 ## 👥 Team
 
 **🧑‍💻 Sviluppato da**: [Veronica Schembri](https://github.com/Pandagan-85)
@@ -869,11 +735,11 @@ Questo progetto è rilasciato sotto licenza **MIT**. Vedi il file [LICENSE](LICE
 
 **🛡️ Sicuro • 💾 Persistente • 📱 Mobile-Ready • 🚀 Production-Tested**
 
-[🚀 Live Demo](https://www.veronicaschembri.com) | [📚 Documentation](https://github.com/your-username/veronica-chatbot/wiki) | [🐛 Report Bug](https://github.com/your-username/veronica-chatbot/issues) | [🛡️ Security Policy](https://github.com/your-username/veronica-chatbot/security/policy)
+[🚀 Live Demo](https://www.veronicaschembri.com)
 
 ---
 
 **Version 2.1.0** - Sicurezza Enterprise & Persistenza Intelligente  
-_Ultimo aggiornamento: Gennaio 2025_
+_Ultimo aggiornamento: Giugno 2025_
 
 </div>
