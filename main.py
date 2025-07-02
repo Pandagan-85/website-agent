@@ -407,30 +407,25 @@ async def health_check():
 @app.post("/chat", response_model=ChatResponse)
 @limiter.limit("10/minute")
 async def chat_endpoint(request: Request, chat_request: ChatRequest):
-
-    """
-    Endpoint principale per la chat con tracing LangSmith
-    """
     try:
         if chatbot is None:
-            raise HTTPException(
-                status_code=503, detail="Chatbot non disponibile")
+            raise HTTPException(status_code=503, detail="Chatbot non disponibile")
 
-        # Valida input
-        if not request.message.strip():
+        # ✅ Usa 'chat_request.message' non 'request.message'
+        if not chat_request.message.strip():
             raise HTTPException(status_code=400, detail="Messaggio vuoto")
 
-        # Processa con tracing
+        # Process con tracing
         if LANGSMITH_ENABLED:
             response, trace_url = process_chat_with_tracing(
-                request.message, request.thread_id)
+                chat_request.message, chat_request.thread_id)
         else:
-            response = chatbot.chat(request.message, request.thread_id)
+            response = chatbot.chat(chat_request.message, chat_request.thread_id)
             trace_url = None
 
         return ChatResponse(
             response=response,
-            thread_id=request.thread_id,
+            thread_id=chat_request.thread_id,
             timestamp=datetime.now().isoformat(),
             langsmith_trace_url=trace_url
         )
@@ -439,8 +434,7 @@ async def chat_endpoint(request: Request, chat_request: ChatRequest):
         raise
     except Exception as e:
         print(f"❌ Errore nel processare la chat: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Errore interno: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Errore interno: {str(e)}")
 
 # --- START test da eliminare ----
 # test rate limit
