@@ -126,6 +126,9 @@ def get_cors_origins() -> List[str]:
         return [
             "https://www.veronicaschembri.com",
             "https://veronicaschembri.com",
+            # Railway domain for API docs access (demo purposes)
+            # In enterprise production, docs would be behind authentication
+            "https://website-agent-production.up.railway.app",
         ]
     elif env == "staging":
         return [
