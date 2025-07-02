@@ -76,13 +76,47 @@ app = FastAPI(
     version="2.0.0"
 )
 
+# Funzione per gestire CORS in base all'ambiente
+def get_cors_origins() -> List[str]:
+    """Get CORS origins based on environment"""
+    env = os.getenv("ENVIRONMENT", "development")
+    
+    if env == "production":
+        return [
+            "https://www.veronicaschembri.com",
+            "https://veronicaschembri.com",
+        ]
+    elif env == "staging":
+        return [
+            "https://staging.veronicaschembri.com",
+            "https://www.veronicaschembri.com",
+        ]
+    else:  # development
+        return [
+            "http://localhost:3000",
+            "http://localhost:8080", 
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:8080",
+            "https://www.veronicaschembri.com",  # Per test con sito reale
+        ]
+
+
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In produzione, specifica i domini
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=[
+        "Accept",
+        "Accept-Language",
+        "Content-Language", 
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "X-WP-Nonce",  # Per WordPress
+    ],
+    max_age=600,  # Cache preflight per 10 minuti
 )
 
 # Inizializza chatbot
