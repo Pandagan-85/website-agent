@@ -55,119 +55,6 @@ def setup_langsmith():
 # Setup LangSmith
 LANGSMITH_ENABLED = setup_langsmith()
 
-# Modelli Pydantic
-
-
-class ChatRequest(BaseModel):
-    message: str = Field(..., min_length=1, max_length=2000, description="User message")
-    thread_id: Optional[str] = Field(default="default", max_length=100, description="Conversation thread ID")
-    conversation_history: Optional[List[Dict[str, str]]] = Field(default=None, description="Previous conversation")
-
-    @validator('message')
-    def validate_message_security(cls, v):
-        """Validate message for security threats"""
-        if not validate_input_security(v):
-            raise ValueError('Message contains invalid or potentially malicious content')
-        return v.strip()
-
-    @validator('thread_id')
-    def validate_thread_id_format(cls, v):
-        """Validate thread ID format"""
-        if v and not validate_thread_id(v):
-            raise ValueError('Invalid thread ID format')
-        return v or "default"
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "message": "Ciao! Parlami dei tuoi progetti di AI",
-                "thread_id": "user_123"
-            }
-        }
-
-
-class ChatResponse(BaseModel):
-    response: str
-    thread_id: str
-    timestamp: str
-    langsmith_trace_url: Optional[str] = None
-
-
-class HealthResponse(BaseModel):
-    status: str
-    timestamp: str
-    services: Dict[str, Any]
-
-# Setup logger 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger("veronica_chatbot")
-
-# Inizializza FastAPI
-app = FastAPI(
-    title="Veronica Schembri WordPress Chatbot",
-    description="AI Chatbot powered by LangGraph and WordPress API with LangSmith tracing",
-    version="2.0.0"
-)
-
-# Rate limit setup
-limiter = Limiter(key_func=get_remote_address)
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-# Funzione per gestire CORS in base all'ambiente
-def get_cors_origins() -> List[str]:
-    """Get CORS origins based on environment"""
-    env = os.getenv("ENVIRONMENT", "development")
-    
-    if env == "production":
-        return [
-            "https://www.veronicaschembri.com",
-            "https://veronicaschembri.com",
-            # Railway domain for API docs access (demo purposes)
-            # In enterprise production, docs would be behind authentication
-            "https://website-agent-production.up.railway.app",
-        ]
-    elif env == "staging":
-        return [
-            "https://staging.veronicaschembri.com",
-            "https://www.veronicaschembri.com",
-        ]
-    else:  # development
-        return [
-            "http://localhost:3000",
-            "http://localhost:8080", 
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:8080",
-            "http://0.0.0.0:3000",         # Se server usa 0.0.0.0
-            "http://0.0.0.0:8080",         # Se server usa 0.0.0.0
-            "https://www.veronicaschembri.com",  # Per test con sito reale
-        ]
-
-
-# CORS configuration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=get_cors_origins(),
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=[
-        "Accept",
-        "Accept-Language",
-        "Content-Language", 
-        "Content-Type",
-        "Authorization",
-        "X-Requested-With",
-        "X-WP-Nonce",  # Per WordPress
-    ],
-    max_age=600,  # Cache preflight per 10 minuti
-)
-
-# Inizializza chatbot
-chatbot = None
-
 # Security validation patterns
 MALICIOUS_PATTERNS: List[Pattern] = [
     re.compile(r'<script[^>]*>.*?</script>', re.IGNORECASE | re.DOTALL),
@@ -229,6 +116,121 @@ def validate_thread_id(thread_id: str) -> bool:
     
     return True
 
+# Funzione per gestire CORS in base all'ambiente
+def get_cors_origins() -> List[str]:
+    """Get CORS origins based on environment"""
+    env = os.getenv("ENVIRONMENT", "development")
+    
+    if env == "production":
+        return [
+            "https://www.veronicaschembri.com",
+            "https://veronicaschembri.com"
+        ]
+    elif env == "staging":
+        return [
+            "https://staging.veronicaschembri.com",
+            "https://www.veronicaschembri.com",
+        ]
+    else:  # development
+        return [
+            "http://localhost:3000",
+            "http://localhost:8080", 
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:8080",
+            "http://0.0.0.0:3000",         # Se server usa 0.0.0.0
+            "http://0.0.0.0:8080",         # Se server usa 0.0.0.0
+            "https://www.veronicaschembri.com",  # Per test con sito reale
+        ]
+
+# Modelli Pydantic
+class ChatRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=2000, description="User message")
+    thread_id: Optional[str] = Field(default="default", max_length=100, description="Conversation thread ID")
+    conversation_history: Optional[List[Dict[str, str]]] = Field(default=None, description="Previous conversation")
+
+    @validator('message')
+    def validate_message_security(cls, v):
+        """Validate message for security threats"""
+        if not validate_input_security(v):
+            raise ValueError('Message contains invalid or potentially malicious content')
+        return v.strip()
+
+    @validator('thread_id')
+    def validate_thread_id_format(cls, v):
+        """Validate thread ID format"""
+        if v and not validate_thread_id(v):
+            raise ValueError('Invalid thread ID format')
+        return v or "default"
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "message": "Ciao! Parlami dei tuoi progetti di AI",
+                    "thread_id": "user_123"
+                }
+            ]
+        }
+    }
+
+
+class ChatResponse(BaseModel):
+    response: str
+    thread_id: str
+    timestamp: str
+    langsmith_trace_url: Optional[str] = None
+
+
+class HealthResponse(BaseModel):
+    status: str
+    timestamp: str
+    services: Dict[str, Any]
+
+# Setup logger 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("veronica_chatbot")
+
+# Inizializza FastAPI
+app = FastAPI(
+    title="Veronica Schembri WordPress Chatbot",
+    description="AI Chatbot powered by LangGraph and WordPress API with LangSmith tracing",
+    version="2.0.0"
+)
+
+# Rate limit setup
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+
+
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=get_cors_origins(),
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=[
+        "Accept",
+        "Accept-Language",
+        "Content-Language", 
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "X-WP-Nonce",  # Per WordPress
+    ],
+    max_age=600,  # Cache preflight per 10 minuti
+)
+
+# Inizializza chatbot
+chatbot = None
+
+
+
 ## Security headers ---
 
 @app.middleware("http")
@@ -236,26 +238,24 @@ async def add_security_headers(request: Request, call_next):
     """Add security headers to all responses"""
     response = await call_next(request)
     
-    # Prevent MIME type sniffing
+    # Altri headers sempre attivi
     response.headers["X-Content-Type-Options"] = "nosniff"
-    
-    # Prevent clickjacking
     response.headers["X-Frame-Options"] = "DENY"
-    
-    # XSS protection (legacy browsers)
     response.headers["X-XSS-Protection"] = "1; mode=block"
     
-    # Force HTTPS (only in production)
     if os.getenv("ENVIRONMENT") == "production":
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     
-    # Control referrer information
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     
-    # Basic Content Security Policy
-    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; object-src 'none';"
+    # ✅ CSP SOLO per endpoint NON-docs
+    if not (request.url.path.startswith("/docs") or 
+            request.url.path.startswith("/redoc") or 
+            request.url.path.startswith("/openapi.json")):
+        # CSP restrictive solo per API
+        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; object-src 'none';"
     
-    # Prevent caching of sensitive data
+    # Prevent caching
     if request.url.path.startswith("/chat"):
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
         response.headers["Pragma"] = "no-cache"
