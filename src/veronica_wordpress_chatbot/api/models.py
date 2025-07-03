@@ -2,24 +2,30 @@
 Pydantic models for API requests/responses - moved from main.py
 """
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Dict, Any, Optional, List
 
 
 class ChatRequest(BaseModel):
-    message: str = Field(..., min_length=1, max_length=2000, description="User message")
-    thread_id: Optional[str] = Field(default="default", max_length=100, description="Conversation thread ID")
-    conversation_history: Optional[List[Dict[str, str]]] = Field(default=None, description="Previous conversation")
+    message: str = Field(..., min_length=1, max_length=2000,
+                         description="User message")
+    thread_id: Optional[str] = Field(
+        default="default", max_length=100, description="Conversation thread ID")
+    conversation_history: Optional[List[Dict[str, str]]] = Field(
+        default=None, description="Previous conversation")
 
-    @validator('message')
+    @field_validator('message')
+    @classmethod
     def validate_message_security(cls, v):
         """Validate message for security threats"""
         from .security import validate_input_security
         if not validate_input_security(v):
-            raise ValueError('Message contains invalid or potentially malicious content')
+            raise ValueError(
+                'Message contains invalid or potentially malicious content')
         return v.strip()
 
-    @validator('thread_id')
+    @field_validator('thread_id')
+    @classmethod
     def validate_thread_id_format(cls, v):
         """Validate thread ID format"""
         from .security import validate_thread_id
