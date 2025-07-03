@@ -37,8 +37,8 @@ LANGSMITH_ENABLED = setup_langsmith()
 @traceable(name="wordpress_chatbot_request")
 def process_chat_with_tracing(message: str, thread_id: str) -> Tuple[str, Optional[str]]:
     """Processa la chat con tracing LangSmith aggiornato"""
-    from ..dependencies import get_chatbot
-    
+    from ..api.dependencies import get_chatbot
+
     chatbot = get_chatbot()
     if chatbot is None:
         raise Exception("Chatbot non inizializzato")
