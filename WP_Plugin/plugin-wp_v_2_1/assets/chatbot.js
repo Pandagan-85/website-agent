@@ -1044,7 +1044,7 @@
                               key: "name",
                               style: { fontWeight: "600", fontSize: "14px" },
                             },
-                            "Veronica Schembri"
+                            "Veronica Schembri AI Chatbot"
                           ),
                           React.createElement(
                             "div",
@@ -1165,7 +1165,7 @@
                           React.createElement(
                             "div",
                             { key: "text" },
-                            "Ciao! Sono Veronica. Come posso aiutarti oggi?"
+                            "Ciao! Sono l'assistente AI di Veronica Schembri. Come posso aiutarti oggi?"
                           ),
                         ]
                       ),
@@ -1213,7 +1213,7 @@
                               fontSize: "14px",
                             },
                           },
-                          "Veronica sta scrivendo..."
+                          "L'assistente AI di Veronica sta scrivendo..."
                         )
                       ),
 
