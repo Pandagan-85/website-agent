@@ -27,12 +27,15 @@
   // 🎯 FUNZIONE PER OTTENERE ENDPOINT VALIDO
   function getValidAPIEndpoint() {
     // Debug: vedi cosa abbiamo
-    console.log("🔍 Config debug:", {
-      wpConfig: window.veronicaChatbotConfig,
-      apiUrl: window.veronicaChatbotConfig?.apiUrl,
-      currentHost: window.location.hostname,
-      currentProtocol: window.location.protocol,
-    });
+    if (
+      window.location.hostname === "localhost" ||
+      window.location.hostname.includes("dev")
+    ) {
+      console.log("🔍 Config debug (dev only):", {
+        hasApiUrl: !!window.veronicaChatbotConfig?.apiUrl,
+        currentHost: window.location.hostname,
+      });
+    }
 
     const configUrl = window.veronicaChatbotConfig?.apiUrl;
 
@@ -44,28 +47,43 @@
           configUrl.startsWith("http://") ||
           configUrl.startsWith("https://")
         ) {
-          console.log("✅ Using configured absolute URL:", configUrl);
+          if (
+            window.location.hostname === "localhost" ||
+            window.location.hostname.includes("dev")
+          ) {
+            console.log("✅ Using configured absolute URL (dev)");
+          }
           return configUrl;
         }
 
         // Se è relativo, costruisci URL assoluto
         if (configUrl.startsWith("/")) {
           const absoluteUrl = window.location.origin + configUrl;
-          console.log(
-            "🔧 Converted relative to absolute:",
-            configUrl,
-            "→",
-            absoluteUrl
-          );
+          if (
+            window.location.hostname === "localhost" ||
+            window.location.hostname.includes("dev")
+          ) {
+            console.log("🔧 Converted relative to absolute (dev)");
+          }
           return absoluteUrl;
         }
 
         // Se non ha protocollo, aggiungi quello corrente
         const withProtocol = `${window.location.protocol}//${configUrl}`;
-        console.log("🔧 Added protocol:", configUrl, "→", withProtocol);
+        if (
+          window.location.hostname === "localhost" ||
+          window.location.hostname.includes("dev")
+        ) {
+          console.log("🔧 Added protocol (dev)");
+        }
         return withProtocol;
       } catch (error) {
-        console.error("❌ Invalid API URL format:", configUrl, error);
+        if (
+          window.location.hostname === "localhost" ||
+          window.location.hostname.includes("dev")
+        ) {
+          console.error("❌ Invalid API URL format (dev):", error.message);
+        }
       }
     }
 
@@ -92,7 +110,12 @@
     ].filter(Boolean);
 
     for (const fallback of fallbacks) {
-      console.warn(`⚠️ Trying fallback API URL: ${fallback}`);
+      if (
+        window.location.hostname === "localhost" ||
+        window.location.hostname.includes("dev")
+      ) {
+        console.warn(`⚠️ Trying fallback API URL (dev)`);
+      }
       return fallback;
     }
 
@@ -760,18 +783,17 @@
           storageManager.updateSessionActivity();
 
           // 🔍 DEBUG DETTAGLIATO
-          console.group("🔗 API Request Debug");
-          console.log("API URL:", config.apiUrl);
-          console.log("Message:", sanitizedMessage);
-          console.log("Thread ID:", session.sessionId);
-          console.log("Request timestamp:", new Date().toISOString());
+          // console.group("🔗 API Request Debug");
+          // console.log("Message:", sanitizedMessage);
+          // console.log("Thread ID:", session.sessionId);
+          // console.log("Request timestamp:", new Date().toISOString());
 
           const requestBody = {
             message: sanitizedMessage,
             thread_id: session.sessionId,
           };
 
-          console.log("Request body:", requestBody);
+          // console.log("Request body:", requestBody);
 
           const response = await fetch(config.apiUrl, {
             method: "POST",
@@ -782,27 +804,41 @@
             signal: AbortSignal.timeout(CHATBOT_CONFIG.API.TIMEOUT),
           });
 
-          console.log("Response received:");
-          console.log("- Status:", response.status);
-          console.log("- Status Text:", response.statusText);
-          console.log("- OK:", response.ok);
-          console.log(
-            "- Headers:",
-            Object.fromEntries(response.headers.entries())
-          );
-          console.log("- URL:", response.url);
-          console.groupEnd();
+          // console.log("Response received:");
+          // console.log("- Status:", response.status);
+          // console.log("- Status Text:", response.statusText);
+          // console.log("- OK:", response.ok);
+          // console.log(
+          //   "- Headers:",
+          //   Object.fromEntries(response.headers.entries())
+          // );
+          // console.log("- URL:", response.url);
+          // console.groupEnd();
 
           if (!response.ok) {
             const errorText = await response.text();
-            console.error("❌ API Error Response:", errorText);
+            if (
+              window.location.hostname === "localhost" ||
+              window.location.hostname.includes("dev")
+            ) {
+              console.error("❌ API Error Response (dev):", errorText);
+            } else {
+              console.error("❌ API Error:", response.status);
+            }
             throw new Error(
               `HTTP ${response.status}: ${response.statusText}\n${errorText}`
             );
           }
 
           const data = await response.json();
-          console.log("✅ API Response data:", data);
+          if (
+            window.location.hostname === "localhost" ||
+            window.location.hostname.includes("dev")
+          ) {
+            console.log("✅ API Response data (dev):", data);
+          } else {
+            console.log("✅ API Response received");
+          }
 
           // Aggiungi risposta bot
           addMessage({
@@ -814,12 +850,17 @@
             sender: "bot",
           });
         } catch (error) {
-          console.group("❌ Error Details");
-          console.error("Error name:", error.name);
-          console.error("Error message:", error.message);
-          console.error("Error stack:", error.stack);
-          console.error("Error cause:", error.cause);
-          console.groupEnd();
+          if (
+            window.location.hostname === "localhost" ||
+            window.location.hostname.includes("dev")
+          ) {
+            console.group("❌ Error Details (dev)");
+            console.error("Error name:", error.name);
+            console.error("Error message:", error.message);
+            console.groupEnd();
+          } else {
+            console.error("❌ Connection error occurred");
+          }
 
           // 🎯 GESTIONE ERRORI SPECIFICA
           let errorMessage = "Ops! Qualcosa è andato storto.";
