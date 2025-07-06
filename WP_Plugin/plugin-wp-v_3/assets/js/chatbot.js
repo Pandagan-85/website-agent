@@ -28,7 +28,7 @@ import {
   formatBotMessageSafely,
 } from "./modules/formatting.js";
 
-import { VeronicaChatbot } from "./modules/ui-components.js";
+import { VeronicaChatbot } from "./modules/ui-components/index.js";
 
 import {
   setupCrossPageSync,
