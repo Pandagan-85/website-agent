@@ -43,6 +43,14 @@ class Veronica_Chatbot_Frontend_Manager {
 
         $options = $this->settings_manager->get_options();
 
+        // Load CSS dedicato
+        wp_enqueue_style(
+            'veronica-chatbot-styles',
+            VERONICA_CHATBOT_URL . 'assets/css/chatbot-styles.css',
+            array(),
+            VERONICA_CHATBOT_VERSION
+        );
+
         // Load React from CDN (production)
         wp_enqueue_script(
             'react',
@@ -88,8 +96,7 @@ class Veronica_Chatbot_Frontend_Manager {
             'version' => VERONICA_CHATBOT_VERSION
         ));
 
-        // Add inline CSS for better loading
-        $this->add_inline_styles();
+        
     }
 
     /**

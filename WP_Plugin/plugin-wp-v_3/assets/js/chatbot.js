@@ -11,23 +11,32 @@
 // =====================================
 
 import {
-  CHATBOT_CONFIG,
   getValidAPIEndpoint,
   showAPIConfigError,
+  isDevelopmentMode,
+  devLog,
 } from "./modules/config.js";
 import { ChatStorageManager } from "./modules/storage.js";
 import {
   sanitizeInput,
   validateInputSecure,
   logSecurityEvent,
+  setupErrorTracking,
 } from "./modules/security.js";
 import {
   renderMessageContent,
   formatBotMessageSafely,
 } from "./modules/formatting.js";
 import { VeronicaChatbot } from "./modules/ui-components.js";
-import { setupCrossPageSync } from "./modules/cross-page-sync.js";
-import { initDebugTools } from "./modules/debug-tools.js";
+import {
+  setupCrossPageSync,
+  coordinateMultipleInstances,
+  monitorSyncPerformance,
+} from "./modules/cross-page-sync.js";
+import {
+  initDebugTools,
+  setupPerformanceMonitoring,
+} from "./modules/debug-tools.js";
 
 (function () {
   "use strict";
