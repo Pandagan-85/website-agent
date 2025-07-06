@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Veronica Schembri Chatbot v3.0 - Modular Edition
+ * Plugin Name: Veronica Schembri Chatbot v4.0 - Modular Edition
  * Plugin URI: https://www.veronicaschembri.com
  * Description: AI Chatbot intelligente con LangGraph e persistenza sessioni - Architettura modulare
- * Version: 3.0.0
+ * Version: 4.0.2
  * Author: Veronica Schembri
  * Author URI: https://www.veronicaschembri.com
  * License: MIT
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('VERONICA_CHATBOT_VERSION', '3.0.0');
+define('VERONICA_CHATBOT_VERSION', '4.0.2');
 define('VERONICA_CHATBOT_PATH', plugin_dir_path(__FILE__));
 define('VERONICA_CHATBOT_URL', plugin_dir_url(__FILE__));
 define('VERONICA_CHATBOT_BASENAME', plugin_basename(__FILE__));
