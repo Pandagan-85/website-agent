@@ -1,11 +1,10 @@
 /**
  * Config Module - Configurazione e Gestione API
- * Estratto da chatbot.js originale (righe 10-150 circa)
- * Gestisce configurazione, endpoint API e validazione URL
+ * FIXED: Aggiunto export di CHATBOT_CONFIG
  */
 
 // =====================================
-// CONFIGURAZIONE GLOBALE
+// CONFIGURAZIONE GLOBALE - EXPORTED
 // =====================================
 
 export const CHATBOT_CONFIG = {
@@ -29,14 +28,10 @@ export const CHATBOT_CONFIG = {
 
 /**
  * Ottieni endpoint API valido
- * Estratto dalla funzione getValidAPIEndpoint() originale
  */
 export function getValidAPIEndpoint() {
   // Debug: vedi cosa abbiamo
-  if (
-    window.location.hostname === "localhost" ||
-    window.location.hostname.includes("dev")
-  ) {
+  if (isDevelopmentMode()) {
     console.log("🔍 Config debug (dev only):", {
       hasApiUrl: !!window.veronicaChatbotConfig?.apiUrl,
       currentHost: window.location.hostname,
@@ -50,10 +45,7 @@ export function getValidAPIEndpoint() {
     try {
       // Se è già assoluto, usalo
       if (configUrl.startsWith("http://") || configUrl.startsWith("https://")) {
-        if (
-          window.location.hostname === "localhost" ||
-          window.location.hostname.includes("dev")
-        ) {
+        if (isDevelopmentMode()) {
           console.log("✅ Using configured absolute URL (dev)");
         }
         return configUrl;
@@ -62,10 +54,7 @@ export function getValidAPIEndpoint() {
       // Se è relativo, costruisci URL assoluto
       if (configUrl.startsWith("/")) {
         const absoluteUrl = window.location.origin + configUrl;
-        if (
-          window.location.hostname === "localhost" ||
-          window.location.hostname.includes("dev")
-        ) {
+        if (isDevelopmentMode()) {
           console.log("🔧 Converted relative to absolute (dev)");
         }
         return absoluteUrl;
@@ -73,18 +62,12 @@ export function getValidAPIEndpoint() {
 
       // Se non ha protocollo, aggiungi quello corrente
       const withProtocol = `${window.location.protocol}//${configUrl}`;
-      if (
-        window.location.hostname === "localhost" ||
-        window.location.hostname.includes("dev")
-      ) {
+      if (isDevelopmentMode()) {
         console.log("🔧 Added protocol (dev)");
       }
       return withProtocol;
     } catch (error) {
-      if (
-        window.location.hostname === "localhost" ||
-        window.location.hostname.includes("dev")
-      ) {
+      if (isDevelopmentMode()) {
         console.error("❌ Invalid API URL format (dev):", error.message);
       }
     }
@@ -113,10 +96,7 @@ export function getValidAPIEndpoint() {
   ].filter(Boolean);
 
   for (const fallback of fallbacks) {
-    if (
-      window.location.hostname === "localhost" ||
-      window.location.hostname.includes("dev")
-    ) {
+    if (isDevelopmentMode()) {
       console.warn(`⚠️ Trying fallback API URL (dev)`);
     }
     return fallback;
@@ -129,7 +109,6 @@ export function getValidAPIEndpoint() {
 
 /**
  * Mostra errore configurazione API
- * Estratto dalla funzione showAPIConfigError() originale
  */
 export function showAPIConfigError() {
   const errorDiv = document.createElement("div");
@@ -179,9 +158,25 @@ export function showAPIConfigError() {
   }, 15000);
 }
 
-// =====================================
-// UTILITY CONFIGURATION
-// =====================================
+/**
+ * Verifica se siamo in modalità development
+ */
+export function isDevelopmentMode() {
+  return (
+    window.location.hostname === "localhost" ||
+    window.location.hostname.includes("dev") ||
+    window.veronicaChatbotConfig?.debugMode
+  );
+}
+
+/**
+ * Log sicuro per development
+ */
+export function devLog(...args) {
+  if (isDevelopmentMode()) {
+    console.log(...args);
+  }
+}
 
 /**
  * Ottieni configurazione completa per JavaScript
@@ -203,26 +198,6 @@ export function getJSConfig() {
     debugMode: wpConfig.debugMode || false,
     version: wpConfig.version || "3.0.0",
   };
-}
-
-/**
- * Verifica se siamo in modalità development
- */
-export function isDevelopmentMode() {
-  return (
-    window.location.hostname === "localhost" ||
-    window.location.hostname.includes("dev") ||
-    window.veronicaChatbotConfig?.debugMode
-  );
-}
-
-/**
- * Log sicuro per development
- */
-export function devLog(...args) {
-  if (isDevelopmentMode()) {
-    console.log(...args);
-  }
 }
 
 /**

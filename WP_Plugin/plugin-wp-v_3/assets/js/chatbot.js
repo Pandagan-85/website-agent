@@ -1,9 +1,6 @@
 /**
- * Veronica Schembri Chatbot Frontend - v3.0 Modular Edition
- * Entry Point Minimale - Importa tutti i moduli specializzati
- *
- * Estratto e refactorizzato da chatbot.js originale (1932 righe)
- * Ora: ~50 righe + 8 moduli specializzati
+ * Veronica Schembri Chatbot Frontend - v3.0 Smart Logging
+ * SECURE: Logs solo in development, produzione pulita
  */
 
 // =====================================
@@ -11,32 +8,41 @@
 // =====================================
 
 import {
+  CHATBOT_CONFIG,
   getValidAPIEndpoint,
   showAPIConfigError,
   isDevelopmentMode,
   devLog,
 } from "./modules/config.js";
+
 import { ChatStorageManager } from "./modules/storage.js";
+
 import {
   sanitizeInput,
   validateInputSecure,
   logSecurityEvent,
-  setupErrorTracking,
 } from "./modules/security.js";
+
 import {
   renderMessageContent,
   formatBotMessageSafely,
 } from "./modules/formatting.js";
+
 import { VeronicaChatbot } from "./modules/ui-components.js";
+
 import {
   setupCrossPageSync,
   coordinateMultipleInstances,
   monitorSyncPerformance,
 } from "./modules/cross-page-sync.js";
+
 import {
   initDebugTools,
   setupPerformanceMonitoring,
 } from "./modules/debug-tools.js";
+
+// ✅ SOLO IN DEV MODE
+devLog("✅ Moduli chatbot importati");
 
 (function () {
   "use strict";
@@ -45,43 +51,72 @@ import {
   // CONFIGURAZIONE INIZIALE
   // =====================================
 
-  // Imposta l'endpoint API all'avvio
-  CHATBOT_CONFIG.API.ENDPOINT = getValidAPIEndpoint();
+  try {
+    devLog("🔧 Configurazione iniziale...");
+    CHATBOT_CONFIG.API.ENDPOINT = getValidAPIEndpoint();
+
+    // ✅ SICURO: Non espone URL in produzione
+    devLog("🔗 API configurato");
+  } catch (error) {
+    devLog("❌ Errore configurazione:", error.message);
+    return;
+  }
 
   // =====================================
   // INIZIALIZZAZIONE
   // =====================================
 
   function initializeChatbot() {
-    // Verifica che la configurazione sia valida
-    if (!CHATBOT_CONFIG.API.ENDPOINT) {
-      console.error("❌ Cannot initialize chatbot without valid API URL");
-      showAPIConfigError();
-      return;
-    }
+    devLog("🤖 Inizializzazione chatbot...");
 
-    // Injection CSS base
-    injectBaseStyles();
+    try {
+      if (!CHATBOT_CONFIG.API.ENDPOINT) {
+        devLog("❌ API endpoint mancante");
+        showAPIConfigError();
+        return false;
+      }
 
-    // Trova o crea container
-    let container = document.getElementById("veronica-chatbot-container");
-    if (!container) {
-      container = document.createElement("div");
-      container.id = "veronica-chatbot-container";
-      container.className = "veronica-chatbot-floating";
-      document.body.appendChild(container);
-    }
+      devLog("✅ Configurazione valida");
 
-    // Mount React component
-    const root = ReactDOM.createRoot(container);
-    root.render(React.createElement(VeronicaChatbot));
+      // Injection CSS base
+      injectBaseStyles();
 
-    console.log("✅ Veronica Chatbot v3.0 inizializzato (Modular Edition)");
+      // Container setup
+      let container = document.getElementById("veronica-chatbot-container");
+      if (!container) {
+        devLog("📦 Creando container...");
+        container = document.createElement("div");
+        container.id = "veronica-chatbot-container";
+        container.className = "veronica-chatbot-floating";
+        document.body.appendChild(container);
+      }
 
-    // Rimuovi indicatore di caricamento se presente
-    const loadingElement = document.getElementById("veronica-chatbot-loading");
-    if (loadingElement) {
-      setTimeout(() => (loadingElement.style.display = "none"), 1000);
+      // Verifica React
+      if (typeof React === "undefined" || typeof ReactDOM === "undefined") {
+        devLog("❌ React non disponibile");
+        return false;
+      }
+
+      devLog("⚛️ Montaggio componente React...");
+
+      // Mount React component
+      const root = ReactDOM.createRoot(container);
+      root.render(React.createElement(VeronicaChatbot));
+
+      devLog("✅ Chatbot inizializzato");
+
+      // Cleanup loading indicator
+      const loadingElement = document.getElementById(
+        "veronica-chatbot-loading"
+      );
+      if (loadingElement) {
+        setTimeout(() => (loadingElement.style.display = "none"), 1000);
+      }
+
+      return true;
+    } catch (error) {
+      devLog("❌ Errore inizializzazione:", error.message);
+      return false;
     }
   }
 
@@ -91,6 +126,7 @@ import {
 
   function injectBaseStyles() {
     if (!document.getElementById("veronica-chatbot-base-css")) {
+      devLog("🎨 Iniettando CSS base...");
       const style = document.createElement("style");
       style.id = "veronica-chatbot-base-css";
       style.textContent = `
@@ -125,9 +161,10 @@ import {
 
   function waitForReact(callback) {
     if (typeof React !== "undefined" && typeof ReactDOM !== "undefined") {
+      devLog("✅ React disponibile");
       callback();
     } else {
-      console.log("⏳ Aspettando React...");
+      devLog("⏳ Aspettando React...");
       setTimeout(() => waitForReact(callback), 100);
     }
   }
@@ -136,48 +173,37 @@ import {
   // ENTRY POINT
   // =====================================
 
-  // Avvio quando React è disponibile
   waitForReact(() => {
     try {
-      // Setup cross-page sync
+      devLog("🔄 Setup cross-page sync...");
       setupCrossPageSync();
 
-      // Inizializza chatbot
-      initializeChatbot();
+      devLog("🚀 Avvio chatbot...");
+      const success = initializeChatbot();
 
-      // Inizializza debug tools se necessario
-      if (
-        window.location.hostname === "localhost" ||
-        window.location.hostname.includes("dev") ||
-        window.veronicaChatbotConfig?.debugMode
-      ) {
-        initDebugTools();
+      if (success) {
+        // Debug tools solo in development
+        if (isDevelopmentMode()) {
+          devLog("🐛 Inizializzazione debug tools...");
+          initDebugTools();
+          setupPerformanceMonitoring();
+        }
+
+        // ✅ SICURO: Evento senza dati sensibili
+        window.dispatchEvent(
+          new CustomEvent("veronicaChatbotReady", {
+            detail: { status: "ready" },
+          })
+        );
+
+        devLog("🎉 Chatbot pronto!");
+      } else {
+        devLog("❌ Inizializzazione fallita");
       }
-
-      // Log inizializzazione
-      const config = window.veronicaChatbotConfig || {};
-      console.log("🚀 Veronica Chatbot v3.0 caricato!", {
-        version: config.version || "3.0.0",
-        architecture: "Modular (8 modules)",
-        features: {
-          persistenza: "✅ Sessioni e messaggi",
-          crossPage: "✅ Sync tra pagine",
-          responsive: "✅ Mobile + Desktop",
-          sicurezza: "✅ Input sanitization",
-          modules: "✅ ES6 Modules",
-        },
-      });
-
-      // Dispatch evento per integrazioni
-      window.dispatchEvent(
-        new CustomEvent("veronicaChatbotReady", {
-          detail: { version: "3.0.0", architecture: "modular" },
-        })
-      );
     } catch (error) {
-      console.error("❌ Errore inizializzazione Veronica Chatbot v3.0:", error);
+      devLog("❌ Errore critico:", error.message);
 
-      // Fallback error display
+      // Fallback user-friendly senza dettagli tecnici
       const errorContainer = document.createElement("div");
       errorContainer.style.cssText = `
                 position: fixed; bottom: 20px; right: 20px;
@@ -186,12 +212,11 @@ import {
                 font-size: 14px; z-index: 999999; max-width: 300px;
             `;
       errorContainer.innerHTML = `
-                <strong>Chatbot Error v3.0</strong><br>
-                Impossibile caricare il chatbot modulare.
-                <a href="#" onclick="window.location.reload()" style="color: #dc2626;">Ricarica</a>
+                <strong>Chat temporaneamente non disponibile</strong><br>
+                <a href="#" onclick="window.location.reload()" style="color: #dc2626;">Riprova</a>
             `;
       document.body.appendChild(errorContainer);
-      setTimeout(() => errorContainer.remove(), 10000);
+      setTimeout(() => errorContainer.remove(), 5000);
     }
   });
 })();
