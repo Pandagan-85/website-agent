@@ -1,6 +1,6 @@
 /**
- * Custom React Hooks - VERSIONE FINALE CORRETTA
- * FIX DEFINITIVO: addMessage aggiorna correttamente lo stato React
+ * Custom React Hooks - Con filtro ripetizione introduzione
+ * NUOVO: Rimuove l'introduzione ripetitiva dalle risposte bot
  */
 
 import {
@@ -9,6 +9,38 @@ import {
   logSecurityEvent,
 } from "../security.js";
 import { isDevelopmentMode, devLog } from "../config.js";
+
+/**
+ * Rimuove l'introduzione ripetitiva dalle risposte bot
+ */
+function cleanBotResponse(content, isFirstMessage = false) {
+  if (!content || typeof content !== "string") return content;
+
+  // Pattern per riconoscere l'introduzione
+  const introPatterns = [
+    /^👋\s*Ciao!\s*Sono\s+l['']assistente\s+AI\s+di\s+Veronica\s+Schembri[^.]*\.\s*/i,
+    /^Ciao!\s*Sono\s+l['']assistente\s+AI\s+di\s+Veronica\s+Schembri[^.]*\.\s*/i,
+    /^Sono\s+l['']assistente\s+AI\s+di\s+Veronica\s+Schembri[^.]*\.\s*/i,
+    /^👋[^.]*Veronica\s+Schembri[^.]*\.\s*/i,
+  ];
+
+  // Se è il primo messaggio, mantieni l'introduzione
+  if (isFirstMessage) {
+    return content;
+  }
+
+  // Altrimenti, rimuovi l'introduzione
+  let cleanedContent = content;
+  for (const pattern of introPatterns) {
+    cleanedContent = cleanedContent.replace(pattern, "");
+  }
+
+  // Rimuovi spazi extra all'inizio
+  cleanedContent = cleanedContent.trim();
+
+  // Se dopo la pulizia il contenuto è vuoto, usa quello originale
+  return cleanedContent || content;
+}
 
 /**
  * Hook per gestione stato UI (open, minimized, etc.)
@@ -79,7 +111,7 @@ export function useChatSession(storageManager) {
 
 /**
  * Hook per gestione messaggi e invio
- * FIX DEFINITIVO: addMessage corretto
+ * NUOVO: Con filtro introduzione ripetitiva
  */
 export function useMessageHandling(storageManager, session, config) {
   // Messaggi con persistenza
@@ -91,7 +123,7 @@ export function useMessageHandling(storageManager, session, config) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState("");
 
-  // FIXED: Funzione per aggiungere messaggio - versione corretta
+  // Funzione per aggiungere messaggio
   const addMessage = React.useCallback(
     (message) => {
       if (isDevelopmentMode()) {
@@ -114,13 +146,12 @@ export function useMessageHandling(storageManager, session, config) {
         devLog("📝 Messaggio sanitizzato:", sanitizedMessage);
       }
 
-      // FIXED: Prima aggiorna lo stato React, poi salva nello storage
+      // Prima aggiorna lo stato React, poi salva nello storage
       setMessages((prevMessages) => {
         const newMessages = [...prevMessages, sanitizedMessage];
 
         if (isDevelopmentMode()) {
           devLog("📝 Aggiornando state con:", newMessages.length, "messaggi");
-          devLog("📝 Ultimo messaggio:", sanitizedMessage);
         }
 
         // Salva nel storage in modo asincrono
@@ -211,13 +242,31 @@ export function useMessageHandling(storageManager, session, config) {
           devLog("✅ API Response data:", data);
         }
 
-        // Aggiungi risposta bot
+        // NUOVO: Controlla se è il primo messaggio bot e pulisci la risposta
+        const isFirstBotMessage =
+          messages.filter((msg) => msg.sender === "bot").length === 0;
+        const rawResponse =
+          data.response ||
+          data.message ||
+          "Mi dispiace, non ho ricevuto una risposta valida.";
+        const cleanedResponse = cleanBotResponse(
+          rawResponse,
+          isFirstBotMessage
+        );
+
+        if (isDevelopmentMode()) {
+          devLog("🧹 Risposta pulita:", {
+            isFirstBotMessage,
+            originalLength: rawResponse.length,
+            cleanedLength: cleanedResponse.length,
+            wasFiltered: rawResponse !== cleanedResponse,
+          });
+        }
+
+        // Aggiungi risposta bot pulita
         addMessage({
           type: "bot",
-          content:
-            data.response ||
-            data.message ||
-            "Mi dispiace, non ho ricevuto una risposta valida.",
+          content: cleanedResponse,
           sender: "bot",
         });
 
@@ -278,10 +327,17 @@ export function useMessageHandling(storageManager, session, config) {
         setIsLoading(false);
       }
     },
-    [isLoading, config?.apiUrl, session.sessionId, storageManager, addMessage]
+    [
+      isLoading,
+      config?.apiUrl,
+      session.sessionId,
+      storageManager,
+      addMessage,
+      messages,
+    ]
   );
 
-  // FIXED: Reset messaggi completo
+  // Reset messaggi completo
   const resetMessages = React.useCallback(() => {
     setMessages([]);
     setError("");
@@ -293,7 +349,7 @@ export function useMessageHandling(storageManager, session, config) {
     }
   }, [storageManager]);
 
-  // FIXED: Debug dello stato messages
+  // Debug dello stato messages
   React.useEffect(() => {
     if (isDevelopmentMode()) {
       devLog("📊 Stato messages aggiornato:", {
@@ -305,13 +361,13 @@ export function useMessageHandling(storageManager, session, config) {
 
   return {
     messages,
-    setMessages, // Export setMessages
+    setMessages,
     addMessage,
     sendMessage,
-    resetMessages, // Export resetMessages
+    resetMessages,
     isLoading,
     error,
-    setError, // Export setError
+    setError,
   };
 }
 
