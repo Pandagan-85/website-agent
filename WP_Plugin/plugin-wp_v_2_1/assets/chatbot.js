@@ -1734,17 +1734,17 @@
       },
     };
 
-    console.log("🐛 Debug utilities disponibili: window.VeronicaChatbotDebug");
-    console.log("📋 Comandi disponibili:");
-    console.log(
-      "  • VeronicaChatbotDebug.showSessionInfo() - Info sessione corrente"
-    );
-    console.log("  • VeronicaChatbotDebug.testAPI() - Test connessione API");
-    console.log("  • VeronicaChatbotDebug.hardReset() - Reset completo");
-    console.log(
-      "  • VeronicaChatbotDebug.showStorageStats() - Statistiche storage"
-    );
-    console.log("  • VeronicaChatbotDebug.exportData() - Esporta backup");
+    // console.log("🐛 Debug utilities disponibili: window.VeronicaChatbotDebug");
+    // console.log("📋 Comandi disponibili:");
+    // console.log(
+    //   "  • VeronicaChatbotDebug.showSessionInfo() - Info sessione corrente"
+    // );
+    // console.log("  • VeronicaChatbotDebug.testAPI() - Test connessione API");
+    // console.log("  • VeronicaChatbotDebug.hardReset() - Reset completo");
+    // console.log(
+    //   "  • VeronicaChatbotDebug.showStorageStats() - Statistiche storage"
+    // );
+    // console.log("  • VeronicaChatbotDebug.exportData() - Esporta backup");
   }
 
   // =====================================
@@ -1794,31 +1794,31 @@
 
       // Log inizializzazione con info dettagliate
       const config = window.veronicaChatbotConfig || {};
-      console.log("🚀 Veronica Chatbot caricato con successo!", {
-        version: config.version || "unknown",
-        features: {
-          persistenza: "✅ Sessioni e messaggi",
-          crossPage: "✅ Sync tra pagine",
-          responsive: "✅ Mobile + Desktop",
-          sicurezza: "✅ Input sanitization",
-          storage: localStorage ? "✅ LocalStorage" : "⚠️ Memory only",
-          debug: config.debugMode ? "✅ Debug attivo" : "ℹ️ Debug disattivo",
-        },
-        config: {
-          apiUrl: config.apiUrl,
-          theme: config.theme,
-          position: config.position,
-          sessionDuration: `${Math.round(
-            (config.sessionDuration || CHATBOT_CONFIG.SESSION_DURATION) /
-              (24 * 60 * 60 * 1000)
-          )} giorni`,
-          conversationTimeout: `${Math.round(
-            (config.conversationTimeout ||
-              CHATBOT_CONFIG.CONVERSATION_TIMEOUT) /
-              (60 * 60 * 1000)
-          )} ore`,
-        },
-      });
+      // console.log("🚀 Veronica Chatbot caricato con successo!", {
+      //   version: config.version || "unknown",
+      //   features: {
+      //     persistenza: "✅ Sessioni e messaggi",
+      //     crossPage: "✅ Sync tra pagine",
+      //     responsive: "✅ Mobile + Desktop",
+      //     sicurezza: "✅ Input sanitization",
+      //     storage: localStorage ? "✅ LocalStorage" : "⚠️ Memory only",
+      //     debug: config.debugMode ? "✅ Debug attivo" : "ℹ️ Debug disattivo",
+      //   },
+      //   config: {
+      //     apiUrl: config.apiUrl,
+      //     theme: config.theme,
+      //     position: config.position,
+      //     sessionDuration: `${Math.round(
+      //       (config.sessionDuration || CHATBOT_CONFIG.SESSION_DURATION) /
+      //         (24 * 60 * 60 * 1000)
+      //     )} giorni`,
+      //     conversationTimeout: `${Math.round(
+      //       (config.conversationTimeout ||
+      //         CHATBOT_CONFIG.CONVERSATION_TIMEOUT) /
+      //         (60 * 60 * 1000)
+      //     )} ore`,
+      //   },
+      // });
 
       // Notifica WordPress del caricamento completato (se in WordPress)
       if (typeof wp !== "undefined" && wp.hooks) {

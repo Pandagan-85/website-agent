@@ -1,0 +1,733 @@
+/**
+ * Veronica Schembri Chatbot - Complete Styles
+ * Estratto da tutti gli stili inline del JavaScript originale
+ * Versione 3.0.0 - Modular Edition
+ */
+
+/* =====================================
+   CONTAINER E LAYOUT PRINCIPALE
+   ===================================== */
+
+#veronica-chatbot-container {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+#veronica-chatbot-container *,
+#veronica-chatbot-container *::before,
+#veronica-chatbot-container *::after {
+  box-sizing: border-box;
+}
+
+/* =====================================
+     FLOATING BUTTON
+     ===================================== */
+
+.veronica-chatbot-trigger {
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f66061, #8b5cf6);
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+  bottom: 60px;
+  left: 60px;
+}
+
+.veronica-chatbot-trigger:hover {
+  transform: scale(1.1);
+}
+
+.veronica-chatbot-trigger:active {
+  transform: scale(0.95);
+}
+
+/* =====================================
+     CHAT WINDOW
+     ===================================== */
+
+.veronica-chatbot-window {
+  position: fixed;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: height 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  z-index: 999999;
+}
+
+/* Desktop positioning */
+.veronica-chatbot-window {
+  width: 380px;
+  max-width: 400px;
+  height: 500px;
+  bottom: 20px;
+  right: 20px;
+}
+
+.veronica-chatbot-window.position-left {
+  right: auto;
+  left: 20px;
+}
+
+.veronica-chatbot-window.minimized {
+  height: 60px;
+}
+
+/* Dark theme */
+.veronica-chatbot-window.theme-dark {
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+
+/* =====================================
+     HEADER
+     ===================================== */
+
+.veronica-chatbot-header {
+  padding: 16px;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #111827;
+}
+
+.veronica-chatbot-header.theme-dark {
+  background-color: #374151;
+  color: #f9fafb;
+  border-bottom-color: #4b5563;
+}
+
+.veronica-chatbot-header.minimized {
+  border-bottom: none;
+}
+
+.veronica-chatbot-header-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.veronica-chatbot-header-avatar {
+  font-size: 20px;
+}
+
+.veronica-chatbot-header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.veronica-chatbot-header-name {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.veronica-chatbot-header-status {
+  font-size: 12px;
+  opacity: 0.7;
+  line-height: 1.2;
+}
+
+.veronica-chatbot-header-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.veronica-chatbot-header-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0.7;
+  padding: 4px;
+  border-radius: 4px;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.veronica-chatbot-header-btn:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.veronica-chatbot-header-btn.theme-dark:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* =====================================
+     MESSAGES AREA
+     ===================================== */
+
+.veronica-chatbot-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar */
+.veronica-chatbot-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.veronica-chatbot-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.veronica-chatbot-messages::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.veronica-chatbot-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* =====================================
+     WELCOME MESSAGE
+     ===================================== */
+
+.veronica-chatbot-welcome {
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  padding: 20px;
+}
+
+.veronica-chatbot-welcome.theme-dark {
+  color: #9ca3af;
+}
+
+.veronica-chatbot-welcome-emoji {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+/* =====================================
+     MESSAGE CONTAINERS
+     ===================================== */
+
+.veronica-chatbot-message {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.veronica-chatbot-message.user {
+  justify-content: flex-end;
+}
+
+.veronica-chatbot-message.bot {
+  justify-content: flex-start;
+}
+
+/* =====================================
+     MESSAGE BUBBLES
+     ===================================== */
+
+.veronica-chatbot-message-content {
+  max-width: 85%;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+/* User messages */
+.veronica-chatbot-message-content.user {
+  border-radius: 18px 18px 4px 18px;
+  background-color: #f66061;
+  color: white;
+}
+
+/* Bot messages */
+.veronica-chatbot-message-content.bot {
+  border-radius: 18px 18px 18px 4px;
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.veronica-chatbot-message-content.bot.theme-dark {
+  background-color: #374151;
+  color: #f9fafb;
+}
+
+/* Error messages */
+.veronica-chatbot-message-content.error {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.veronica-chatbot-message-content.error.theme-dark {
+  background-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+/* =====================================
+     MESSAGE CONTENT FORMATTING
+     ===================================== */
+
+.veronica-chatbot-message-content h2 {
+  margin: 14px 0 10px 0;
+  font-weight: bold;
+  color: inherit;
+  font-size: 16px;
+}
+
+.veronica-chatbot-message-content h3 {
+  margin: 12px 0 8px 0;
+  font-weight: bold;
+  color: inherit;
+  font-size: 15px;
+}
+
+.veronica-chatbot-message-content ul {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.veronica-chatbot-message-content li {
+  margin-bottom: 4px;
+}
+
+.veronica-chatbot-message-content a {
+  color: #f66061;
+  text-decoration: underline;
+}
+
+.veronica-chatbot-message-content a:hover {
+  text-decoration: none;
+}
+
+.veronica-chatbot-message-content strong {
+  font-weight: 600;
+}
+
+.veronica-chatbot-message-content code {
+  background-color: #f3f4f6;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+}
+
+.veronica-chatbot-message-content.theme-dark code {
+  background-color: #4b5563;
+  color: #e5e7eb;
+}
+
+.veronica-chatbot-message-content mark {
+  background-color: #fef08a;
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+
+/* =====================================
+     LOADING INDICATOR
+     ===================================== */
+
+.veronica-chatbot-loading {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #f66061, #8b5cf6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  z-index: 999998;
+  animation: pulse 2s infinite;
+}
+
+.veronica-chatbot-typing {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+}
+
+.veronica-chatbot-typing-content {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 18px 18px 18px 4px;
+  background-color: #f3f4f6;
+  color: #111827;
+  font-size: 14px;
+}
+
+.veronica-chatbot-typing-content.theme-dark {
+  background-color: #374151;
+  color: #f9fafb;
+}
+
+/* =====================================
+     INPUT AREA
+     ===================================== */
+
+.veronica-chatbot-input-form {
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+  background-color: white;
+}
+
+.veronica-chatbot-input-form.theme-dark {
+  background-color: #1f2937;
+  border-top-color: #4b5563;
+}
+
+.veronica-chatbot-input-container {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.veronica-chatbot-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  background-color: white;
+  color: #111827;
+  resize: none;
+  max-height: 100px;
+  transition: border-color 0.2s ease;
+}
+
+.veronica-chatbot-input:focus {
+  border-color: #f66061;
+  box-shadow: 0 0 0 3px rgba(246, 96, 97, 0.1);
+}
+
+.veronica-chatbot-input.error {
+  border: 2px solid #f87171;
+}
+
+.veronica-chatbot-input.theme-dark {
+  background-color: #4b5563;
+  color: #f9fafb;
+  border-color: #6b7280;
+}
+
+.veronica-chatbot-input.theme-dark:focus {
+  border-color: #f66061;
+  box-shadow: 0 0 0 3px rgba(246, 96, 97, 0.2);
+}
+
+.veronica-chatbot-submit {
+  padding: 8px 16px;
+  background-color: #f66061;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 60px;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.veronica-chatbot-submit:hover:not(:disabled) {
+  background-color: #e55555;
+}
+
+.veronica-chatbot-submit:disabled {
+  background-color: #6b7280;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* =====================================
+     ANIMATIONS
+     ===================================== */
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.veronica-chatbot-window {
+  animation: slideUp 0.3s ease-out;
+}
+
+.veronica-chatbot-message {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* =====================================
+     RESPONSIVE DESIGN
+     ===================================== */
+
+@media (max-width: 768px) {
+  .veronica-chatbot-window {
+    left: 20px !important;
+    right: 20px !important;
+    width: calc(100vw - 40px) !important;
+    max-width: none !important;
+    height: 70vh !important;
+    bottom: 20px !important;
+  }
+
+  .veronica-chatbot-window.minimized {
+    height: 60px !important;
+  }
+
+  .veronica-chatbot-trigger {
+    right: 20px !important;
+  }
+
+  .veronica-chatbot-loading {
+    right: 20px !important;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  .veronica-chatbot-input {
+    font-size: 16px !important;
+  }
+
+  .veronica-chatbot-submit {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    min-width: 50px !important;
+  }
+
+  /* Adjust header for mobile */
+  .veronica-chatbot-header {
+    padding: 12px 16px;
+  }
+
+  .veronica-chatbot-header-name {
+    font-size: 13px;
+  }
+
+  .veronica-chatbot-header-status {
+    font-size: 11px;
+  }
+
+  /* Adjust messages for mobile */
+  .veronica-chatbot-messages {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .veronica-chatbot-message-content {
+    max-width: 90%;
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  /* Adjust input for mobile */
+  .veronica-chatbot-input-form {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .veronica-chatbot-window {
+    left: 10px !important;
+    right: 10px !important;
+    width: calc(100vw - 20px) !important;
+  }
+
+  .veronica-chatbot-trigger {
+    right: 15px !important;
+    bottom: 15px !important;
+    width: 55px;
+    height: 55px;
+    font-size: 22px;
+  }
+
+  .veronica-chatbot-message-content {
+    max-width: 95%;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .veronica-chatbot-welcome {
+    padding: 15px;
+  }
+
+  .veronica-chatbot-welcome-emoji {
+    font-size: 40px;
+    margin-bottom: 12px;
+  }
+}
+
+/* =====================================
+     ACCESSIBILITY
+     ===================================== */
+
+.veronica-chatbot-trigger:focus,
+.veronica-chatbot-header-btn:focus,
+.veronica-chatbot-input:focus,
+.veronica-chatbot-submit:focus {
+  outline: 2px solid #f66061;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .veronica-chatbot-window {
+    border: 2px solid #000;
+  }
+
+  .veronica-chatbot-message-content.bot {
+    background-color: #e5e7eb;
+    border: 1px solid #6b7280;
+  }
+
+  .veronica-chatbot-input {
+    border: 2px solid #374151;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .veronica-chatbot-trigger,
+  .veronica-chatbot-window,
+  .veronica-chatbot-message,
+  .veronica-chatbot-header-btn {
+    animation: none;
+    transition: none;
+  }
+
+  .veronica-chatbot-loading {
+    animation: none;
+  }
+}
+
+/* =====================================
+     PRINT STYLES
+     ===================================== */
+
+@media print {
+  #veronica-chatbot-container {
+    display: none !important;
+  }
+}
+
+/* =====================================
+     ERROR STATES
+     ===================================== */
+
+.veronica-chatbot-error-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  font-family: sans-serif;
+  font-size: 14px;
+  z-index: 999999;
+  max-width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease-out;
+}
+
+.veronica-chatbot-error-container a {
+  color: #dc2626;
+  text-decoration: underline;
+}
+
+.veronica-chatbot-error-container a:hover {
+  text-decoration: none;
+}
+
+/* =====================================
+     LOADING STATES
+     ===================================== */
+
+.veronica-chatbot-window.loading {
+  pointer-events: none;
+}
+
+.veronica-chatbot-window.loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.veronica-chatbot-window.loading.theme-dark::after {
+  background: rgba(31, 41, 55, 0.8);
+}
+
+/* =====================================
+     UTILITY CLASSES
+     ===================================== */
+
+.veronica-chatbot-hidden {
+  display: none !important;
+}
+
+.veronica-chatbot-visible {
+  display: block !important;
+}
+
+.veronica-chatbot-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -1,0 +1,308 @@
+# Veronica Schembri Chatbot - Translation Template
+# Copyright (C) 2024 Veronica Schembri
+# This file is distributed under the same license as the Veronica Chatbot plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Veronica Chatbot 3.0.0\n"
+"Report-Msgid-Bugs-To: https://www.veronicaschembri.com\n"
+"POT-Creation-Date: 2024-12-10 12:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Extracted from PHP code\n"
+
+#: veronica-chatbot.php:15
+msgid "AI Chatbot intelligente con LangGraph e persistenza sessioni - Architettura modulare"
+msgstr ""
+
+#: includes/class-admin-interface.php:25
+msgid "Veronica Chatbot Settings"
+msgstr ""
+
+#: includes/class-admin-interface.php:26
+msgid "Veronica Chatbot"
+msgstr ""
+
+#: includes/class-admin-interface.php:45
+msgid "Configurazione Principale"
+msgstr ""
+
+#: includes/class-admin-interface.php:51
+msgid "URL API Backend"
+msgstr ""
+
+#: includes/class-admin-interface.php:58
+msgid "Abilita Chatbot"
+msgstr ""
+
+#: includes/class-admin-interface.php:66
+msgid "Aspetto e Posizione"
+msgstr ""
+
+#: includes/class-admin-interface.php:72
+msgid "Tema"
+msgstr ""
+
+#: includes/class-admin-interface.php:79
+msgid "Posizione"
+msgstr ""
+
+#: includes/class-admin-interface.php:87
+msgid "Impostazioni Visualizzazione"
+msgstr ""
+
+#: includes/class-admin-interface.php:93
+msgid "Mostra su Pagine"
+msgstr ""
+
+#: includes/class-admin-interface.php:101
+msgid "Gestione Persistenza"
+msgstr ""
+
+#: includes/class-admin-interface.php:107
+msgid "Durata Sessione (giorni)"
+msgstr ""
+
+#: includes/class-admin-interface.php:114
+msgid "Timeout Conversazione (ore)"
+msgstr ""
+
+#: includes/class-admin-interface.php:121
+msgid "Massimo Messaggi in Memoria"
+msgstr ""
+
+#: includes/class-admin-interface.php:128
+msgid "Abilita Persistenza"
+msgstr ""
+
+#: includes/class-admin-interface.php:135
+msgid "Sincronizzazione Cross-Page"
+msgstr ""
+
+#: includes/class-admin-interface.php:143
+msgid "Debug e Sviluppo"
+msgstr ""
+
+#: includes/class-admin-interface.php:149
+msgid "Modalità Debug"
+msgstr ""
+
+#: includes/class-admin-interface.php:165
+msgid "Veronica Schembri AI Chatbot"
+msgstr ""
+
+#: includes/class-admin-interface.php:166
+msgid "Versione"
+msgstr ""
+
+#: includes/class-admin-interface.php:168
+msgid "Chatbot intelligente con persistenza sessioni e sincronizzazione cross-page."
+msgstr ""
+
+#: includes/class-admin-interface.php:172
+msgid "Impostazioni salvate!"
+msgstr ""
+
+#: includes/class-admin-interface.php:195
+msgid "Informazioni"
+msgstr ""
+
+#: includes/class-admin-interface.php:198
+msgid "Stato:"
+msgstr ""
+
+#: includes/class-admin-interface.php:200
+msgid "Attivo"
+msgstr ""
+
+#: includes/class-admin-interface.php:200
+msgid "Disattivo"
+msgstr ""
+
+#: includes/class-admin-interface.php:202
+msgid "API URL:"
+msgstr ""
+
+#: includes/class-admin-interface.php:204
+msgid "Tema:"
+msgstr ""
+
+#: includes/class-admin-interface.php:205
+msgid "Posizione:"
+msgstr ""
+
+#: includes/class-admin-interface.php:209
+msgid "Persistenza"
+msgstr ""
+
+#: includes/class-admin-interface.php:210
+msgid "Durata Sessione:"
+msgstr ""
+
+#: includes/class-admin-interface.php:211
+msgid "Timeout Conversazione:"
+msgstr ""
+
+#: includes/class-admin-interface.php:212
+msgid "Max Messaggi:"
+msgstr ""
+
+#: includes/class-admin-interface.php:216
+msgid "Testa Connessione API"
+msgstr ""
+
+#: includes/class-admin-interface.php:223
+msgid "Statistiche Utilizzo"
+msgstr ""
+
+#: includes/class-admin-interface.php:227
+msgid "Reset Statistiche"
+msgstr ""
+
+#: includes/class-admin-interface.php:233
+msgid "Documentazione"
+msgstr ""
+
+#: includes/class-admin-interface.php:252
+msgid "Conversazioni Totali:"
+msgstr ""
+
+#: includes/class-admin-interface.php:253
+msgid "Messaggi Totali:"
+msgstr ""
+
+#: includes/class-admin-interface.php:254
+msgid "Sessioni Attive:"
+msgstr ""
+
+#: includes/class-admin-interface.php:256
+msgid "Ultima Attività:"
+msgstr ""
+
+#: includes/class-admin-interface.php:280
+msgid "Testing..."
+msgstr ""
+
+#: includes/class-admin-interface.php:305
+msgid "Resetting..."
+msgstr ""
+
+#: includes/class-admin-interface.php:325
+msgid "Sei sicuro di voler resettare le statistiche?"
+msgstr ""
+
+#: includes/class-admin-interface.php:340
+msgid "Configurazione principale del chatbot."
+msgstr ""
+
+#: includes/class-admin-interface.php:344
+msgid "Personalizza aspetto e posizionamento del chatbot."
+msgstr ""
+
+#: includes/class-admin-interface.php:348
+msgid "Controlla dove viene visualizzato il chatbot."
+msgstr ""
+
+#: includes/class-admin-interface.php:352
+msgid "Gestisce la persistenza delle conversazioni e sessioni utente."
+msgstr ""
+
+#: includes/class-admin-interface.php:356
+msgid "Opzioni per debugging e sviluppo."
+msgstr ""
+
+#: includes/class-admin-interface.php:362
+msgid "URL del tuo backend API (es: https://your-api.com/chat)"
+msgstr ""
+
+#: includes/class-admin-interface.php:367
+msgid "Abilita il chatbot sul sito"
+msgstr ""
+
+#: includes/class-admin-interface.php:372
+msgid "Chiaro"
+msgstr ""
+
+#: includes/class-admin-interface.php:373
+msgid "Scuro"
+msgstr ""
+
+#: includes/class-admin-interface.php:385
+msgid "Basso a destra"
+msgstr ""
+
+#: includes/class-admin-interface.php:386
+msgid "Basso a sinistra"
+msgstr ""
+
+#: includes/class-admin-interface.php:398
+msgid "Tutte le pagine"
+msgstr ""
+
+#: includes/class-admin-interface.php:399
+msgid "Solo homepage"
+msgstr ""
+
+#: includes/class-admin-interface.php:400
+msgid "Solo articoli"
+msgstr ""
+
+#: includes/class-admin-interface.php:401
+msgid "Solo pagine statiche"
+msgstr ""
+
+#: includes/class-admin-interface.php:402
+msgid "Nessuna pagina (disabilitato)"
+msgstr ""
+
+#: includes/class-admin-interface.php:414
+msgid "Durata massima di una sessione in giorni (1-30)"
+msgstr ""
+
+#: includes/class-admin-interface.php:420
+msgid "Ore di inattività prima del reset conversazione (1-168)"
+msgstr ""
+
+#: includes/class-admin-interface.php:426
+msgid "Numero massimo di messaggi salvati in memoria (10-500)"
+msgstr ""
+
+#: includes/class-admin-interface.php:432
+msgid "Abilita persistenza sessioni e messaggi"
+msgstr ""
+
+#: includes/class-admin-interface.php:433
+msgid "Salva le conversazioni nel browser dell'utente"
+msgstr ""
+
+#: includes/class-admin-interface.php:439
+msgid "Abilita sincronizzazione tra pagine"
+msgstr ""
+
+#: includes/class-admin-interface.php:440
+msgid "Mantiene la conversazione aperta quando l'utente naviga"
+msgstr ""
+
+#: includes/class-admin-interface.php:446
+msgid "Abilita modalità debug"
+msgstr ""
+
+#: includes/class-admin-interface.php:447
+msgid "Aggiunge funzioni di debugging alla console browser"
+msgstr ""
+
+#: veronica-chatbot.php:85
+msgid "Impostazioni"
+msgstr ""
+
+#: veronica-chatbot.php:94
+msgid "Supporto"
+msgstr ""
+
+#: veronica-chatbot.php:95
+msgid "GitHub"
+msgstr ""
