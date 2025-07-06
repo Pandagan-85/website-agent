@@ -1,6 +1,6 @@
 /**
- * Custom React Hooks - Logica estratta da ui-components.js
- * Hooks personalizzati per gestire stato e logica del chatbot
+ * Custom React Hooks - VERSIONE FINALE CORRETTA
+ * FIX DEFINITIVO: addMessage aggiorna correttamente lo stato React
  */
 
 import {
@@ -79,6 +79,7 @@ export function useChatSession(storageManager) {
 
 /**
  * Hook per gestione messaggi e invio
+ * FIX DEFINITIVO: addMessage corretto
  */
 export function useMessageHandling(storageManager, session, config) {
   // Messaggi con persistenza
@@ -90,9 +91,13 @@ export function useMessageHandling(storageManager, session, config) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState("");
 
-  // Funzione per aggiungere messaggio
+  // FIXED: Funzione per aggiungere messaggio - versione corretta
   const addMessage = React.useCallback(
     (message) => {
+      if (isDevelopmentMode()) {
+        devLog("📝 addMessage chiamato con:", message);
+      }
+
       const sanitizedMessage = {
         ...message,
         content:
@@ -105,9 +110,30 @@ export function useMessageHandling(storageManager, session, config) {
         timestamp: message.timestamp || Date.now(),
       };
 
-      const newMessage = storageManager.addMessage(sanitizedMessage);
-      setMessages((prev) => [...prev, newMessage]);
-      return newMessage;
+      if (isDevelopmentMode()) {
+        devLog("📝 Messaggio sanitizzato:", sanitizedMessage);
+      }
+
+      // FIXED: Prima aggiorna lo stato React, poi salva nello storage
+      setMessages((prevMessages) => {
+        const newMessages = [...prevMessages, sanitizedMessage];
+
+        if (isDevelopmentMode()) {
+          devLog("📝 Aggiornando state con:", newMessages.length, "messaggi");
+          devLog("📝 Ultimo messaggio:", sanitizedMessage);
+        }
+
+        // Salva nel storage in modo asincrono
+        try {
+          storageManager.addMessage(sanitizedMessage);
+        } catch (error) {
+          console.error("❌ Errore salvataggio messaggio:", error);
+        }
+
+        return newMessages;
+      });
+
+      return sanitizedMessage;
     },
     [storageManager]
   );
@@ -125,6 +151,10 @@ export function useMessageHandling(storageManager, session, config) {
 
       setIsLoading(true);
       setError("");
+
+      if (isDevelopmentMode()) {
+        devLog("📤 Inviando messaggio utente:", sanitizedMessage);
+      }
 
       // Aggiungi messaggio utente
       addMessage({
@@ -190,6 +220,10 @@ export function useMessageHandling(storageManager, session, config) {
             "Mi dispiace, non ho ricevuto una risposta valida.",
           sender: "bot",
         });
+
+        if (isDevelopmentMode()) {
+          devLog("📤 Messaggio bot aggiunto");
+        }
       } catch (error) {
         // Debug errori
         if (isDevelopmentMode()) {
@@ -199,7 +233,7 @@ export function useMessageHandling(storageManager, session, config) {
           console.groupEnd();
         }
 
-        // Gestione errori specifica (estratta dal codice originale)
+        // Gestione errori specifica
         let errorMessage = "Ops! Qualcosa è andato storto.";
 
         if (error.name === "TimeoutError" || error.name === "AbortError") {
@@ -247,21 +281,37 @@ export function useMessageHandling(storageManager, session, config) {
     [isLoading, config?.apiUrl, session.sessionId, storageManager, addMessage]
   );
 
-  // Reset messaggi
+  // FIXED: Reset messaggi completo
   const resetMessages = React.useCallback(() => {
     setMessages([]);
+    setError("");
     storageManager.saveMessages([]);
+    storageManager.clearMessages?.(); // Se il metodo esiste
+
+    if (isDevelopmentMode()) {
+      devLog("🧹 Messaggi resettati completamente");
+    }
   }, [storageManager]);
+
+  // FIXED: Debug dello stato messages
+  React.useEffect(() => {
+    if (isDevelopmentMode()) {
+      devLog("📊 Stato messages aggiornato:", {
+        count: messages.length,
+        lastMessage: messages[messages.length - 1],
+      });
+    }
+  }, [messages]);
 
   return {
     messages,
-    setMessages,
+    setMessages, // Export setMessages
     addMessage,
     sendMessage,
-    resetMessages,
+    resetMessages, // Export resetMessages
     isLoading,
     error,
-    setError,
+    setError, // Export setError
   };
 }
 

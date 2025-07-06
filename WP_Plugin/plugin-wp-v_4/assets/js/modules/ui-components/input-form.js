@@ -1,13 +1,12 @@
 /**
- * Input Form Component - Gestione Input e Invio Messaggi
- * CORRETTO: Usa classi CSS originali v3_ok
+ * Input Form Component - Versione pulita (senza debug)
  */
 
 import { sanitizeInput } from "../security.js";
 import { isDevelopmentMode, devLog } from "../config.js";
 
 /**
- * Componente InputForm - USA CLASSI ORIGINALI v3_ok
+ * Componente InputForm - Versione finale pulita
  */
 export function InputForm({ onSendMessage, isLoading, theme }) {
   const [inputValue, setInputValue] = React.useState("");
@@ -59,13 +58,13 @@ export function InputForm({ onSendMessage, isLoading, theme }) {
     [error]
   );
 
-  // ===== CSS CLASSES ORIGINALI v3_ok =====
-  let formClasses = "veronica-chatbot-input-form"; // ← CLASSE ORIGINALE
+  // ===== CSS CLASSES =====
+  let formClasses = "veronica-chatbot-input-form";
   if (theme === "dark") {
     formClasses += " theme-dark";
   }
 
-  let inputClasses = "veronica-chatbot-input"; // ← CLASSE ORIGINALE
+  let inputClasses = "veronica-chatbot-input";
   if (error) {
     inputClasses += " error";
   }
@@ -82,7 +81,7 @@ export function InputForm({ onSendMessage, isLoading, theme }) {
     },
     React.createElement(
       "div",
-      { className: "veronica-chatbot-input-container" }, // ← CLASSE ORIGINALE
+      { className: "veronica-chatbot-input-container" },
       [
         // ===== TEXTAREA =====
         React.createElement("textarea", {
@@ -107,7 +106,7 @@ export function InputForm({ onSendMessage, isLoading, theme }) {
           {
             key: "submit",
             type: "submit",
-            className: "veronica-chatbot-submit", // ← CLASSE ORIGINALE
+            className: "veronica-chatbot-submit",
             disabled: !inputValue.trim() || isLoading,
             "aria-label": "Invia messaggio",
           },
@@ -115,84 +114,5 @@ export function InputForm({ onSendMessage, isLoading, theme }) {
         ),
       ]
     )
-  );
-}
-
-/**
- * Send Icon Component
- */
-function SendIcon() {
-  return React.createElement(
-    "svg",
-    {
-      width: "18",
-      height: "18",
-      viewBox: "0 0 24 24",
-      fill: "none",
-      xmlns: "http://www.w3.org/2000/svg",
-    },
-    React.createElement("path", {
-      d: "M22 2L11 13",
-      stroke: "currentColor",
-      strokeWidth: "2",
-      strokeLinecap: "round",
-      strokeLinejoin: "round",
-    }),
-    React.createElement("path", {
-      d: "M22 2L15 22L11 13L2 9L22 2Z",
-      stroke: "currentColor",
-      strokeWidth: "2",
-      strokeLinecap: "round",
-      strokeLinejoin: "round",
-    })
-  );
-}
-
-/**
- * Loading Spinner Component
- */
-function LoadingSpinner() {
-  return React.createElement(
-    "div",
-    { className: "veronica-chatbot-spinner" },
-    React.createElement(
-      "svg",
-      {
-        width: "18",
-        height: "18",
-        viewBox: "0 0 24 24",
-        fill: "none",
-      },
-      React.createElement("circle", {
-        cx: "12",
-        cy: "12",
-        r: "10",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeDasharray: "60",
-        strokeDashoffset: "60",
-        className: "veronica-chatbot-spinner-circle",
-      })
-    )
-  );
-}
-
-/**
- * Character Counter Component (per futuro uso)
- */
-export function CharacterCounter({ current, max = 1000 }) {
-  const percentage = (current / max) * 100;
-  const isNearLimit = percentage > 80;
-  const isAtLimit = percentage >= 100;
-
-  return React.createElement(
-    "div",
-    {
-      className: buildClassName("veronica-chatbot-char-counter", {
-        "veronica-chatbot-char-counter--warning": isNearLimit,
-        "veronica-chatbot-char-counter--error": isAtLimit,
-      }),
-    },
-    `${current}/${max}`
   );
 }

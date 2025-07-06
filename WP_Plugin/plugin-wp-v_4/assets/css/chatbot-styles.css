@@ -24,7 +24,7 @@
      ===================================== */
 
 .veronica-chatbot-trigger {
-  position: fixed;
+  position: fixed !important; /* Force fixed positioning */
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -39,8 +39,14 @@
   align-items: center;
   justify-content: center;
   z-index: 999999;
-  bottom: 60px;
-  left: 60px;
+  bottom: 20px !important;
+  right: 20px !important;
+  left: auto !important;
+}
+
+.veronica-chatbot-trigger.position-left {
+  right: auto !important;
+  left: 20px !important;
 }
 
 .veronica-chatbot-trigger:hover {
@@ -56,7 +62,7 @@
      ===================================== */
 
 .veronica-chatbot-window {
-  position: fixed;
+  position: fixed !important; /* Force fixed positioning */
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
@@ -66,6 +72,12 @@
   transition: height 0.3s ease;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   z-index: 999999;
+  /* Posizionamento esplicito */
+  width: 380px;
+  max-width: 400px;
+  height: 500px;
+  bottom: 20px !important;
+  right: 20px !important;
 }
 
 /* Desktop positioning */
@@ -80,6 +92,11 @@
 .veronica-chatbot-window.position-left {
   right: auto;
   left: 20px;
+}
+
+.veronica-chatbot-trigger:not(.position-left) {
+  right: 20px !important;
+  left: auto !important;
 }
 
 .veronica-chatbot-window.minimized {
@@ -519,7 +536,12 @@
   }
 
   .veronica-chatbot-trigger {
+    bottom: 20px !important;
     right: 20px !important;
+  }
+  .veronica-chatbot-trigger.position-left {
+    right: auto !important;
+    left: 20px !important;
   }
 
   .veronica-chatbot-loading {
@@ -581,6 +603,10 @@
     width: 55px;
     height: 55px;
     font-size: 22px;
+  }
+  .veronica-chatbot-trigger.position-left {
+    right: auto !important;
+    left: 15px !important;
   }
 
   .veronica-chatbot-message-content {

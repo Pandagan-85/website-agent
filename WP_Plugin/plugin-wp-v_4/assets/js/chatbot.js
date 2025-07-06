@@ -1,6 +1,6 @@
 /**
  * Veronica Schembri Chatbot Frontend - v4.0 Modular Architecture
- * REFACTORED: Struttura modulare migliorata per manutenibilità
+ * FIXED: Risolto problema posizionamento chat
  */
 
 // =====================================
@@ -84,7 +84,7 @@ devLog("✅ Moduli chatbot v4.0 importati - architettura modulare");
       // Il CSS viene caricato da WordPress tramite wp_enqueue_style
       // Non serve iniettarlo via JavaScript
 
-      // Injection CSS di base per il container
+      // Injection CSS di base per il container (FIXED: rimosso position relative)
       if (!document.getElementById("veronica-chatbot-base-css")) {
         const style = document.createElement("style");
         style.id = "veronica-chatbot-base-css";
@@ -92,9 +92,6 @@ devLog("✅ Moduli chatbot v4.0 importati - architettura modulare");
           #veronica-chatbot-container {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             box-sizing: border-box;
-          }
-          .veronica-chatbot-floating {
-            position: relative;
           }
         `;
         document.head.appendChild(style);
@@ -109,9 +106,8 @@ devLog("✅ Moduli chatbot v4.0 importati - architettura modulare");
       }
 
       // Setup cross-page sync (controlla se abilitato nella config)
-      const jsConfig = getJSConfig(); // ← Usa la funzione giusta
+      const jsConfig = getJSConfig();
       if (jsConfig.enableCrossPageSync) {
-        // ← Usa la proprietà giusta
         setupCrossPageSync();
         coordinateMultipleInstances();
         devLog("🔄 Cross-page sync attivato");
@@ -134,11 +130,11 @@ devLog("✅ Moduli chatbot v4.0 importati - architettura modulare");
 
   function renderChatbotApp() {
     // Cerca container esistente o crea nuovo
-    let container = document.getElementById("veronica-chatbot-container"); // ← Usa ID originale
+    let container = document.getElementById("veronica-chatbot-container");
     if (!container) {
       container = document.createElement("div");
-      container.id = "veronica-chatbot-container"; // ← ID originale
-      container.className = "veronica-chatbot-floating"; // ← Classe originale
+      container.id = "veronica-chatbot-container";
+      // FIXED: Rimossa classe veronica-chatbot-floating per evitare interferenze CSS
       document.body.appendChild(container);
     }
 
@@ -156,58 +152,93 @@ devLog("✅ Moduli chatbot v4.0 importati - architettura modulare");
     }
 
     // Render componente principale
-    const root = ReactDOM.createRoot ? ReactDOM.createRoot(container) : null;
+    const root = ReactDOM.createRoot
+      ? ReactDOM.createRoot(container)
+      : {
+          render: (element) => ReactDOM.render(element, container),
+        };
 
-    if (root) {
-      // React 18+
-      root.render(React.createElement(VeronicaChatbot));
-      devLog("⚛️ App React 18+ renderizzata");
-    } else {
-      // React 17 fallback
-      ReactDOM.render(React.createElement(VeronicaChatbot), container);
-      devLog("⚛️ App React 17 renderizzata");
+    try {
+      // Mount React component
+      if (ReactDOM.createRoot) {
+        root.render(React.createElement(VeronicaChatbot));
+      } else {
+        // Fallback per versioni più vecchie di React
+        root.render(React.createElement(VeronicaChatbot));
+      }
+
+      devLog("⚛️ Componente React montato");
+
+      // Cleanup loading indicator se presente
+      const loadingElement = document.getElementById(
+        "veronica-chatbot-loading"
+      );
+      if (loadingElement) {
+        setTimeout(() => {
+          loadingElement.style.display = "none";
+        }, 1000);
+      }
+    } catch (error) {
+      console.error("❌ Errore render React:", error);
+      container.innerHTML = `
+        <div style="position: fixed; bottom: 20px; right: 20px; background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; font-size: 14px; z-index: 10000;">
+          ❌ Errore rendering React: ${error.message}
+        </div>
+      `;
     }
   }
 
   // =====================================
-  // AUTO-INIZIALIZZAZIONE
+  // EVENT LISTENERS E CLEANUP
   // =====================================
 
-  // Aspetta DOM ready
+  // Cleanup su unload pagina
+  window.addEventListener("beforeunload", () => {
+    devLog("🧹 Cleanup chatbot...");
+  });
+
+  // =====================================
+  // INIZIALIZZAZIONE AUTOMATICA
+  // =====================================
+
+  // Attendi caricamento DOM
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initializeChatbot);
   } else {
-    // DOM già pronto
-    initializeChatbot();
+    // DOM già caricato
+    setTimeout(initializeChatbot, 100);
   }
 
-  // Cleanup on page unload
-  window.addEventListener("beforeunload", () => {
-    devLog("👋 Cleanup chatbot v4.0...");
-
-    // Cleanup cross-page sync se attivo
-    if (window.VeronicaChatbotSync) {
-      window.VeronicaChatbotSync.cleanup?.();
-    }
-
-    // Cleanup debug tools se attivi
-    if (window.VeronicaChatbotDebug) {
-      window.VeronicaChatbotDebug.cleanup?.();
-    }
-  });
-
   // =====================================
-  // GLOBAL ERROR HANDLING
+  // GESTIONE ERRORI GLOBALI
   // =====================================
 
-  window.addEventListener("error", (e) => {
-    if (e.filename && e.filename.includes("chatbot")) {
-      console.error("🚨 Chatbot v4.0 Error:", e.error);
+  window.addEventListener("error", (event) => {
+    if (
+      event.filename?.includes("chatbot") ||
+      event.message?.includes("veronica")
+    ) {
+      devLog("❌ Errore chatbot:", event.error);
 
-      // Log in debug se disponibile
-      if (isDevelopmentMode() && window.VeronicaChatbotDebug) {
-        window.VeronicaChatbotDebug.logError?.(e.error);
+      // Mostra errore user-friendly solo in development
+      if (isDevelopmentMode()) {
+        console.group("🐛 Chatbot Error Details");
+        console.error("Message:", event.message);
+        console.error("File:", event.filename);
+        console.error("Line:", event.lineno);
+        console.error("Stack:", event.error?.stack);
+        console.groupEnd();
       }
     }
   });
+
+  // Export per debugging (solo in development)
+  if (isDevelopmentMode()) {
+    window.VeronicaChatbotDebug = {
+      config: CHATBOT_CONFIG,
+      reinitialize: initializeChatbot,
+      getConfig: getJSConfig,
+    };
+    devLog("🔧 Debug interface esposta su window.VeronicaChatbotDebug");
+  }
 })();

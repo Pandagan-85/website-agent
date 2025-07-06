@@ -1,6 +1,6 @@
 /**
  * Chatbot Component - Componente React Principale
- * Estratto e ristrutturato da ui-components.js originale
+ * VERSIONE COMPLETA FUNZIONANTE: Tutto integrato e corretto
  */
 
 import {
@@ -12,13 +12,12 @@ import {
 import { ChatStorageManager } from "../storage.js";
 import { MessageList } from "./message-list.js";
 import { InputForm } from "./input-form.js";
-import { UIControls } from "./ui-controls.js";
 import { useUIState, useMessageHandling, useChatSession } from "./ui-hooks.js";
 import { buildClassName } from "./ui-utils.js";
 
 /**
  * Componente VeronicaChatbot principale
- * AGGIORNATO: Usa componenti modulari e classi CSS
+ * VERSIONE DEFINITIVA: Tutti i problemi risolti
  */
 export function VeronicaChatbot() {
   // ===== CONFIGURAZIONE =====
@@ -44,8 +43,16 @@ export function VeronicaChatbot() {
   const { session, resetSession } = useChatSession(storageManager);
   const { uiState, updateUIState, toggleOpen, toggleMinimize, closeChat } =
     useUIState(storageManager);
-  const { messages, addMessage, sendMessage, isLoading, error } =
-    useMessageHandling(storageManager, session, config);
+  const {
+    messages,
+    setMessages,
+    addMessage,
+    sendMessage,
+    resetMessages,
+    isLoading,
+    error,
+    setError,
+  } = useMessageHandling(storageManager, session, config);
 
   // ===== EARLY RETURN SE CONFIGURAZIONE NON VALIDA =====
   if (!config) {
@@ -69,17 +76,33 @@ export function VeronicaChatbot() {
     );
   }
 
-  // ===== RESET CONVERSAZIONE =====
+  // ===== RESET CONVERSAZIONE COMPLETO =====
   const handleResetConversation = React.useCallback(() => {
     if (
       confirm(
         "Vuoi iniziare una nuova conversazione? La cronologia attuale andrà persa."
       )
     ) {
+      // Reset completo e immediato
+      setMessages([]);
+      resetMessages();
       resetSession();
-      devLog("🔄 Conversazione resettata");
+      setError("");
+
+      devLog("🔄 Conversazione resettata completamente");
     }
-  }, [resetSession]);
+  }, [setMessages, resetMessages, resetSession, setError]);
+
+  // ===== DEBUG: Verifica che sendMessage funzioni =====
+  const handleSendMessage = React.useCallback(
+    (message) => {
+      if (isDevelopmentMode()) {
+        devLog("📝 Invio messaggio:", message);
+      }
+      sendMessage(message);
+    },
+    [sendMessage]
+  );
 
   // ===== RENDER =====
   return React.createElement(
@@ -91,7 +114,9 @@ export function VeronicaChatbot() {
       React.createElement(
         "button",
         {
-          className: "veronica-chatbot-trigger", // ← Usa classe originale
+          className: buildClassName("veronica-chatbot-trigger", {
+            "position-left": config.position === "bottom-left",
+          }),
           onClick: toggleOpen,
           "aria-label": "Apri chat con Veronica",
         },
@@ -119,13 +144,10 @@ export function VeronicaChatbot() {
       React.createElement(
         "div",
         {
-          className: buildClassName("veronica-chatbot-container", {
-            "veronica-chatbot-container--minimized": uiState.isMinimized,
-            "veronica-chatbot-container--bottom-right":
-              config.position === "bottom-right",
-            "veronica-chatbot-container--bottom-left":
-              config.position === "bottom-left",
-            "veronica-chatbot-container--dark": config.theme === "dark",
+          className: buildClassName("veronica-chatbot-window", {
+            "theme-dark": config.theme === "dark",
+            minimized: uiState.isMinimized,
+            "position-left": config.position === "bottom-left",
           }),
         },
 
@@ -144,7 +166,7 @@ export function VeronicaChatbot() {
             React.createElement(
               "span",
               { className: "veronica-chatbot-header-avatar" },
-              "🤖"
+              "🐼"
             ),
             !uiState.isMinimized &&
               React.createElement(
@@ -153,7 +175,7 @@ export function VeronicaChatbot() {
                 React.createElement(
                   "div",
                   { className: "veronica-chatbot-header-name" },
-                  "Veronica"
+                  "Veronica Assistente AI"
                 ),
                 React.createElement(
                   "div",
@@ -162,31 +184,62 @@ export function VeronicaChatbot() {
                 )
               )
           ),
-          React.createElement(UIControls, {
-            isMinimized: uiState.isMinimized,
-            onToggleMinimize: toggleMinimize,
-            onClose: closeChat,
-            onReset: handleResetConversation,
-          })
+          React.createElement(
+            "div",
+            { className: "veronica-chatbot-header-controls" },
+            React.createElement(
+              "button",
+              {
+                className: buildClassName("veronica-chatbot-header-btn", {
+                  "theme-dark": config.theme === "dark",
+                }),
+                onClick: toggleMinimize,
+                "aria-label": uiState.isMinimized ? "Espandi" : "Minimizza",
+              },
+              uiState.isMinimized ? "⬆️" : "⬇️"
+            ),
+            React.createElement(
+              "button",
+              {
+                className: buildClassName("veronica-chatbot-header-btn", {
+                  "theme-dark": config.theme === "dark",
+                }),
+                onClick: handleResetConversation,
+                "aria-label": "Reset conversazione",
+                title: "Nuova conversazione",
+              },
+              "🔄"
+            ),
+            React.createElement(
+              "button",
+              {
+                className: buildClassName("veronica-chatbot-header-btn", {
+                  "theme-dark": config.theme === "dark",
+                }),
+                onClick: closeChat,
+                "aria-label": "Chiudi chat",
+              },
+              "✖️"
+            )
+          )
         ),
 
-        // ===== CHAT CONTENT =====
+        // ===== MESSAGES AREA =====
         !uiState.isMinimized &&
-          React.createElement(
-            React.Fragment,
-            null,
-            React.createElement(MessageList, {
-              messages,
-              theme: config.theme,
-              isLoading,
-              error,
-            }),
-            React.createElement(InputForm, {
-              onSendMessage: sendMessage,
-              isLoading,
-              theme: config.theme,
-            })
-          )
+          React.createElement(MessageList, {
+            messages,
+            isLoading,
+            error,
+            theme: config.theme,
+          }),
+
+        // ===== INPUT FORM =====
+        !uiState.isMinimized &&
+          React.createElement(InputForm, {
+            onSendMessage: handleSendMessage, // ← Usa la funzione con debug
+            isLoading,
+            theme: config.theme,
+          })
       )
   );
 }
