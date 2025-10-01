@@ -1,11 +1,12 @@
 """
-Portfolio-related tools - moved from chatbot.py
+Portfolio-related tools
 """
 
 import json
+
 from langchain_core.tools import tool
-from ..config import Configuration
-from ..wordpress import OptimizedWordPressClient, ContentProcessor
+
+from ..wordpress import ContentProcessor, get_wordpress_client
 
 
 @tool
@@ -18,8 +19,7 @@ def get_portfolio_projects(category: str = "", limit: int = 10) -> str:
         limit: Numero massimo di progetti (default 10)
     """
     try:
-        config = Configuration()
-        wp_client = OptimizedWordPressClient(config.wordpress_base_url)
+        wp_client = get_wordpress_client()
 
         params = {"per_page": limit}
         # Note: category filtering può essere implementato se necessario
@@ -27,21 +27,20 @@ def get_portfolio_projects(category: str = "", limit: int = 10) -> str:
         projects = wp_client.get_projects(params)
 
         if not projects:
-            return json.dumps({
-                "message": "Nessun progetto trovato nel portfolio",
-                "total": 0,
-                "projects": []
-            })
+            return json.dumps(
+                {
+                    "message": "Nessun progetto trovato nel portfolio",
+                    "total": 0,
+                    "projects": [],
+                }
+            )
 
         results = []
         for project in projects:
             processed = ContentProcessor.process_project(project)
             results.append(processed)
 
-        return json.dumps({
-            "total": len(results),
-            "projects": results
-        })
+        return json.dumps({"total": len(results), "projects": results})
 
     except Exception as e:
         return json.dumps({"error": f"Errore nel recupero progetti: {str(e)}"})

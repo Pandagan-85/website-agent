@@ -1,9 +1,9 @@
 """
-FastAPI Main - Refactored Entry Point
-All components moved to dedicated modules
+FastAPI Main - Entry point for the Veronica WordPress Chatbot API
 """
 
 import uvicorn
+
 from .api import create_app
 from .api.dependencies import set_chatbot
 from .chatbot import VeronicaChatbot
@@ -46,17 +46,14 @@ if __name__ == "__main__":
     print("🧪 Test WordPress: http://localhost:8000/wordpress/test")
 
     from src.veronica_wordpress_chatbot.utils.tracing import LANGSMITH_ENABLED
+
     if LANGSMITH_ENABLED:
         import os
+
         print(
-            f"📊 LangSmith Project: {os.getenv('LANGSMITH_PROJECT', 'veronica-wordpress-chatbot')}")
+            f"📊 LangSmith Project: {os.getenv('LANGSMITH_PROJECT', 'veronica-wordpress-chatbot')}"
+        )
     else:
         print("⚠️ LangSmith tracing non attivo")
 
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, log_level="info")

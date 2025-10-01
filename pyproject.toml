@@ -22,7 +22,6 @@ dependencies = [
     "langsmith>=0.4.4",
     "openai>=1.93.0",
     "requests>=2.32.4",
-    "beautifulsoup4>=4.13.4",
     "python-dotenv>=1.1.1",
     "pydantic>=2.11.7",
     "slowapi>=0.1.9",
@@ -46,7 +45,8 @@ dev-dependencies = [
     "pytest-asyncio>=0.21.0",
     "black>=22.0.0",
     "isort>=5.10.0",
-    "mypy>=1.0.0"
+    "mypy>=1.0.0",
+    "types-requests>=2.32.4.20250913",
 ]
 
 [project.scripts]

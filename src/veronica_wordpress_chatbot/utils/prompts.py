@@ -1,5 +1,5 @@
 """
-System prompt creation - moved from chatbot.py
+System prompt creation for Veronica Chatbot
 """
 
 import os

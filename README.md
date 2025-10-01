@@ -1,112 +1,162 @@
 # 🤖 Veronica Chatbot - AI Assistant
 
-> **Assistente AI conversazionale** per Veronica Schembri, AI Engineer. Architettura modulare con LangGraph, WordPress integration e sicurezza avanzata.
+> **Assistente AI conversazionale** per Veronica Schembri, AI Engineer. Architettura modulare con **LangGraph ReAct pattern**, WordPress integration e sicurezza avanzata.
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)](https://fastapi.tiangolo.com/)
 [![LangChain](https://img.shields.io/badge/LangChain-0.3.26-orange.svg)](https://python.langchain.com/)
-[![Security](https://img.shields.io/badge/Security-XSS%20Protected-red.svg)](#-sicurezza)
+[![LangGraph](https://img.shields.io/badge/LangGraph-0.5.0-purple.svg)](https://langchain-ai.github.io/langgraph/)
+[![Tests](https://img.shields.io/badge/tests-90%2B%20passing-success.svg)](#-testing)
 
 ---
 
 ## 🎯 Overview
 
-Chatbot AI progettato per rappresentare Veronica Schembri sul suo portfolio, con accesso intelligente ai contenuti WordPress e conversazioni naturali per potenziali clienti e datori di lavoro.
+Chatbot AI che rappresenta Veronica Schembri sul suo portfolio, utilizzando il **pattern ReAct** (Reasoning and Acting) per conversazioni intelligenti con accesso dinamico ai contenuti WordPress.
 
 ### ✨ Caratteristiche Principali
 
-- **🧠 AI Agent**: LangGraph con pattern ReAct per reasoning avanzato
-- **🔧 Architettura Modulare**: Codice organizzato e manutenibile post-refactoring
-- **🌐 WordPress Integration**: API native + custom endpoints ottimizzati
-- **🛡️ Sicurezza Avanzata**: Protezione XSS, input validation, storage sicuro
-- **📱 Mobile Ready**: Widget React responsive con persistenza cross-page
-- **📊 Observability**: LangSmith integration per monitoring e debugging
+- **🧠 AI Agent con ReAct Pattern**: LangGraph orchestration per reasoning e azioni iterative
+- **🔧 Architettura Modulare**: Codice organizzato, testabile e manutenibile
+- **🌐 WordPress Integration**: 9 tools specializzati per accesso contenuti
+- **🛡️ Sicurezza Avanzata**: 23+ test per XSS, DoS prevention, input validation
+- **📱 React Widget**: Frontend responsive con persistenza sessioni
+- **📊 Observability**: LangSmith integration per monitoring
+- **🧪 Test Suite**: 90+ test (unit, integration, e2e)
 
 ---
 
-## 🏗️ Architettura Post-Refactoring
+## 🧠 Pattern ReAct - Come Funziona
+
+Il chatbot implementa il pattern **ReAct** (Reasoning and Acting), un approccio che combina ragionamento e azioni in un ciclo iterativo:
+
+### Flusso ReAct
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     User Input                                   │
+│              "Parlami dei tuoi progetti AI"                      │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  1. REASON (Agent Node)                                          │
+│     LLM analizza la richiesta:                                   │
+│     "L'utente chiede progetti AI → devo chiamare                 │
+│      get_portfolio_projects() tool"                              │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  2. ACT (Tools Node)                                             │
+│     Esegue: get_portfolio_projects(limit=5)                      │
+│     Recupera progetti da WordPress API                           │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  3. OBSERVE (Agent Node)                                         │
+│     LLM riceve risultati tool:                                   │
+│     "Ho trovato 3 progetti: Chatbot, RAG System, ML Pipeline"    │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  4. REASON (Agent Node)                                          │
+│     LLM decide: "Ho le info necessarie, genero risposta finale"  │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  5. RESPOND                                                       │
+│     "Ecco i miei principali progetti AI: ..."                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Implementazione LangGraph
+
+```python
+# workflow/graph.py
+def create_graph():
+    builder = StateGraph(State, input=InputState, config_schema=Configuration)
+
+    # Nodi del grafo
+    builder.add_node("agent", call_model)      # Reasoning
+    builder.add_node("tools", ToolNode(TOOLS)) # Actions
+
+    # Routing condizionale
+    builder.add_conditional_edges(
+        "agent",
+        should_continue,  # Decide se continuare o terminare
+        {
+            "tools": "tools",    # Chiama tools se necessario
+            "__end__": "__end__" # Termina se risposta completa
+        }
+    )
+
+    # Loop ReAct: tools → agent (per osservare risultati)
+    builder.add_edge("tools", "agent")
+
+    return builder.compile(checkpointer=MemorySaver())
+```
+
+**Vantaggi del Pattern ReAct:**
+
+- ✅ **Reasoning trasparente**: Ogni decisione è tracciabile
+- ✅ **Azioni dinamiche**: Sceglie i tool necessari in base al contesto
+- ✅ **Iterativo**: Può chiamare più tool in sequenza se serve
+- ✅ **Robusto**: Gestisce errori e tool falliti
+
+---
+
+## 🏗️ Architettura
 
 ### Struttura Modulare
 
 ```
 src/veronica_wordpress_chatbot/
-├── 🧠 workflow/          # LangGraph orchestration
-│   ├── graph.py          # StateGraph + ReAct pattern
-│   └── __init__.py
-├── 🛠️ tools/            # Specialized AI tools
-│   ├── wordpress_tools.py # WordPress API interactions
-│   ├── __init__.py
-│   └── TOOLS            # Tool registry
-├── 🔌 clients/          # External integrations
-│   ├── wordpress.py     # Optimized WP client
-│   └── __init__.py
-├── 📋 models/           # Data models & state
-│   ├── state.py         # LangGraph State classes
-│   ├── config.py        # Configuration schemas
-│   └── __init__.py
-├── ⚙️ config/           # App configuration
-│   ├── settings.py      # Environment + defaults
-│   └── __init__.py
-└── 🔧 utils/            # Utilities & helpers
-    ├── prompts.py       # System prompt creation
-    ├── tracing.py       # LangSmith integration
-    └── __init__.py
+├── workflow/              # LangGraph orchestration
+│   └── graph.py          # ReAct pattern implementation
+├── tools/                # 9 specialized LangChain tools
+│   ├── blog_tools.py     # search_blog_posts, get_latest_blog_post
+│   ├── portfolio_tools.py # get_portfolio_projects
+│   ├── profile_tools.py  # get_certifications, get_work_experience
+│   ├── content_tools.py  # get_books_and_reading, get_tools_and_stack
+│   └── search_tools.py   # search_all_content, get_contact_info
+├── wordpress/            # WordPress API integration
+│   ├── client.py         # OptimizedWordPressClient
+│   └── processor.py      # ContentProcessor (HTML cleaning)
+├── api/                  # FastAPI application
+│   ├── endpoints/        # REST endpoints
+│   ├── security.py       # Input validation (14+ XSS patterns)
+│   └── models.py         # Pydantic models
+├── models.py             # LangGraph State (TypedDict)
+├── config.py             # Configuration
+└── utils/
+    ├── prompts.py        # System prompt generation
+    └── tracing.py        # LangSmith integration
 ```
 
-### Core Components
+### 🛠️ WordPress Tools
 
-#### 🧠 LangGraph Workflow (`workflow/graph.py`)
+9 tools specializzati per accesso contenuti:
 
-```python
-# Pattern ReAct Implementation
-def create_graph():
-    builder = StateGraph(State, input=InputState, config_schema=Configuration)
-    
-    # Core nodes
-    builder.add_node("agent", call_model)      # 🧠 Reasoning
-    builder.add_node("tools", ToolNode(TOOLS)) # 🛠️ Actions
-    
-    # ReAct flow: Reason → Act → Observe → Repeat
-    builder.add_conditional_edges("agent", should_continue, {
-        "tools": "tools",
-        "__end__": "__end__"
-    })
-    builder.add_edge("tools", "agent")  # Continue reasoning
-    
-    return builder.compile(checkpointer=MemorySaver())
-```
+1. **`search_blog_posts`** - Ricerca articoli per query
+2. **`get_latest_blog_post`** - Ultimo articolo pubblicato
+3. **`get_portfolio_projects`** - Progetti del portfolio
+4. **`get_certifications`** - Certificazioni e formazione
+5. **`get_work_experience`** - Esperienze lavorative
+6. **`get_books_and_reading`** - Libri letti
+7. **`get_tools_and_stack`** - Stack tecnologico
+8. **`search_all_content`** - Ricerca globale
+9. **`get_contact_info`** - Informazioni contatto
 
-#### 🛠️ Specialized Tools (`tools/wordpress_tools.py`)
+Ogni tool:
 
-**📝 Content Discovery**:
-- `search_blog_posts()`: Ricerca intelligente negli articoli
-- `get_latest_blog_post()`: Ultimo contenuto pubblicato
-- `get_portfolio_projects()`: Progetti del portfolio
-
-**🎓 Professional Profile**:
-- `get_certifications()`: Certificazioni e formazione
-- `get_work_experience()`: Esperienze lavorative
-- `get_tools_and_stack()`: Stack tecnologico
-
-**🔍 Advanced Search**:
-- `search_all_content()`: Ricerca globale
-- `get_contact_info()`: Informazioni contatto
-
-#### 🔌 WordPress Client (`clients/wordpress.py`)
-
-```python
-class OptimizedWordPressClient:
-    def __init__(self, base_url: str):
-        self.wp_api_base = f"{base_url}/wp-json/wp/v2"
-        self.field_configs = {
-            "posts": {...},      # Configurazione campi ottimizzata
-            "projects": {...},   # Custom post types
-            "formazione": {...}  # Certificazioni
-        }
-    
-    def _make_request(self, endpoint: str, params: dict = None):
-        # Gestione robusta con timeout e error handling
-```
+- Decorato con `@tool` di LangChain
+- Restituisce JSON per dati strutturati
+- Gestisce errori gracefully
+- Usa `ContentProcessor` per pulire HTML
 
 ---
 
@@ -115,9 +165,9 @@ class OptimizedWordPressClient:
 ### 1. Prerequisites
 
 - **Python 3.11+**
-- **WordPress site** con REST API attiva
+- **UV package manager** (consigliato) o pip
 - **OpenAI API Key**
-- **UV package manager** (consigliato)
+- **WordPress site** con REST API attiva
 
 ### 2. Installation
 
@@ -128,7 +178,7 @@ cd veronica-chatbot
 
 # Setup environment con UV
 uv venv --python 3.11
-source .venv/bin/activate  # Linux/Mac
+source .venv/bin/activate  # Mac/Linux
 # .venv\Scripts\activate   # Windows
 
 # Install dependencies
@@ -140,96 +190,134 @@ uv pip install -r requirements.txt
 Crea file `.env`:
 
 ```bash
-# Core Configuration
+# Required
 OPENAI_API_KEY=your_openai_api_key_here
 WORDPRESS_URL=https://www.veronicaschembri.com
 
-# LangSmith (Optional - per debugging)
-LANGSMITH_API_KEY=your_langsmith_api_key_here
+# Optional - LangSmith tracing
+LANGSMITH_API_KEY=your_langsmith_api_key
 LANGSMITH_PROJECT=veronica-wordpress-chatbot
 LANGSMITH_TRACING=true
 ```
 
-### 4. Run Locally
+### 4. Run
 
 ```bash
 # Test WordPress endpoints
-python -m src.veronica_wordpress_chatbot.test_client
+python -m src.veronica_wordpress_chatbot.chatbot
 
 # Start FastAPI server
 python main.py
 
-# Server available at: http://localhost:8000
+# Server: http://localhost:8000
+# API docs: http://localhost:8000/docs
 ```
-
-### 5. WordPress Plugin Setup (v2.1)
-
-1. **Upload Plugin**:
-   ```bash
-   cp -r WP_Plugin/plugin-wp_v_2_1/ /path/to/wordpress/wp-content/plugins/veronica-chatbot/
-   ```
-
-2. **Activate**: WordPress Admin → Plugins → Activate "Veronica Chatbot"
-
-3. **Configure**: Settings → Veronica Chatbot:
-   - **API Endpoint**: `https://your-backend-url.com/chat`
-   - **Theme**: Light/Dark
-   - **Position**: Bottom Right/Left
-   - **Persistenza**: Durata sessione, timeout, max messaggi
-   - **Sicurezza**: Validazione input, XSS protection
 
 ---
 
-## 🎨 Frontend Features
+## 🧪 Testing
 
-### React Widget con Persistenza
+### Test Suite
 
-**🖥️ Desktop Experience**:
-- Floating button bottom-right
-- Expandable chat window (380px)
-- Minimize/close controls con stato persistente
-- Smooth animations e gestione memoria
+Comprehensive test suite con **90+ test passing**:
 
-**📱 Mobile Responsive**:
-- Full-width con margini intelligenti
-- Optimized touch targets
-- Adjusted typography e spacing
-- iOS zoom prevention (16px input font)
+```bash
+# Run all tests
+uv run pytest
 
-### Sicurezza Frontend
+# Run specific suites
+uv run pytest tests/unit/          # Unit tests
+uv run pytest tests/integration/   # Integration tests
 
-```javascript
-function renderMessageContent(message, config) {
-  if (message.sender === "user") {
-    // MESSAGGI UTENTE: Solo testo puro, sempre
-    return React.createElement("div", {
-      style: userMessageStyle,
-    }, message.content); // Solo testo, niente HTML
-  } else {
-    // MESSAGGI BOT: HTML processato da markdown sicuro
-    const processedContent = formatBotMessageSafely(message.content);
-    return React.createElement("div", {
-      style: botMessageStyle,
-      dangerouslySetInnerHTML: { __html: processedContent },
-    });
-  }
-}
+# Run with coverage
+uv run pytest --cov=src/veronica_wordpress_chatbot --cov-report=html
 ```
 
-### Markdown Support Sicuro
+### Test Coverage
 
-**Supported Features**:
-- ✅ **Bold text**: `**testo**`
-- ✅ **Headers**: `### Titolo`
-- ✅ **Links**: `[testo](url)` (con validazione URL)
-- ✅ **Lists**: `- item`
-- 🛡️ **XSS Protection**: Blocco completo script e contenuti pericolosi
+- **23 test security** - XSS prevention, DoS protection, input validation
+- **27 test tools** - LangChain tools con WordPress mock
+- **15 test workflow** - LangGraph ReAct pattern, state management
+- **40+ test API** - FastAPI endpoints, validation, error handling
+
+Vedi [`tests/README.md`](tests/README.md) per dettagli.
 
 ---
 
-## 🌐 API Endpoints
+## 🛡️ Sicurezza
 
-### Main Chat Endpoint
+### Defense-in-Depth (3 livelli)
+
+1. **Frontend** - React widget valida input prima dell'invio
+2. **Pydantic** - Validators su API models
+3. **Security Module** - 14+ pattern XSS, limiti DoS
+
+### Protezioni Implementate
+
+```python
+# api/security.py
+MALICIOUS_PATTERNS = [
+    r'<script[^>]*>.*?</script>',  # Script tags
+    r'javascript:',                 # JS protocol
+    r'on\w+\s*=',                  # Event handlers
+    r'<iframe[^>]*>',              # Iframes
+    r'eval\s*\(',                  # Eval
+    r'document\.|window\.',        # DOM manipulation
+    # ... 8+ altri pattern
+]
+```
+
+- ✅ **XSS Prevention**: 14+ malicious patterns bloccati
+- ✅ **DoS Prevention**: Limiti lunghezza (2000 chars), caratteri ripetuti
+- ✅ **Input Sanitization**: Encoding check, whitespace validation
+- ✅ **Rate Limiting**: SlowAPI middleware (10 req/min)
+
+23 test dedicati garantiscono la sicurezza.
+
+---
+
+## 🛠️ Stack Tecnologico
+
+### Backend Core
+
+- **Python 3.11+** - Linguaggio principale
+- **LangGraph 0.5.0** - Orchestrazione AI agent (ReAct pattern)
+- **LangChain 0.3.26** - Framework per LLM
+- **LangSmith 0.4.4** - Observability e debugging
+- **OpenAI GPT-4o-mini** - Modello LLM
+
+### Web Framework
+
+- **FastAPI 0.115+** - REST API
+- **Uvicorn** - ASGI server
+- **Pydantic** - Data validation
+- **SlowAPI** - Rate limiting
+
+### WordPress Integration
+
+- **WordPress REST API** - Endpoint nativi
+- **Custom Post Types** - progetti, certificazioni, work-experiences, books, tools
+- **ACF (Advanced Custom Fields)** - Campi personalizzati
+
+### Frontend (WordPress Plugin)
+
+- **React 18** - UI framework (caricato da CDN)
+- **JavaScript ES6+** - Moduli, async/await
+- **LocalStorage** - Persistenza sessioni
+- **Markdown** - Rendering sicuro messaggi bot
+
+### Development Tools
+
+- **UV** - Package manager veloce
+- **pytest** - Test framework (90+ test)
+- **black** - Code formatter
+- **mypy** - Type checking
+
+---
+
+## 📊 API Endpoints
+
+### Chat
 
 ```http
 POST /chat
@@ -241,12 +329,14 @@ Content-Type: application/json
 }
 ```
 
-**Response**:
+**Response:**
+
 ```json
 {
-    "response": "Ecco i miei principali progetti di AI:\n\n**🤖 Chatbot Portfolio**: Questo stesso chatbot che stai usando...",
-    "thread_id": "user-session-123",
-    "sources": ["portfolio_projects", "blog_posts"]
+  "response": "Ecco i miei principali progetti AI: ...",
+  "thread_id": "user-session-123",
+  "timestamp": "2024-01-15T10:30:00",
+  "langsmith_trace_url": "https://smith.langchain.com/..."
 }
 ```
 
@@ -256,251 +346,94 @@ Content-Type: application/json
 GET /health
 ```
 
-**Response**:
-```json
-{
-    "status": "healthy",
-    "wordpress_connection": "ok",
-    "langsmith_enabled": true
-}
+### Debug Tools
+
+```http
+GET /debug/tools      # Lista tools disponibili
+GET /wordpress/test   # Test connessione WordPress
 ```
 
 ---
 
-## 🛡️ Sicurezza
+## 🌐 WordPress Plugin (v4.0)
 
-### Input Sanitization
+### Installation
 
-- **XSS Prevention**: Blocco completo di script, iframe e contenuti pericolosi
-- **HTML Filtering**: Rimozione automatica di tag HTML maliciosi dall'input utente
-- **Content Security**: Validazione pre-input con oltre 20 pattern di sicurezza
-- **Safe Rendering**: Separazione tra messaggi utente (solo testo) e bot (markdown processato)
+```bash
+# Upload plugin
+cp -r WP_Plugin/plugin-wp-v_4/ /path/to/wordpress/wp-content/plugins/veronica-chatbot/
 
-```javascript
-// Esempio di protezione input
-function validateInputSecure(input) {
-  const xssPatterns = [
-    /<script/i, /javascript:/i, /on\w+\s*=/i, /&lt;script/i,
-    /document\./i, /window\./i, /expression\s*\(/i, /import\s+/i,
-  ];
-  return !xssPatterns.some((pattern) => pattern.test(input));
-}
+# Activate in WordPress Admin
+# Configure: Settings → Veronica Chatbot
 ```
 
-### Security Features
+### Plugin Features
 
-- **Real-time Input Validation**: Blocco immediato di contenuti sospetti
-- **Storage Protection**: Validazione dati prima di localStorage
-- **Content Encoding**: Gestione sicura di entità HTML e caratteri speciali
-- **Error Logging**: Tracking eventi di sicurezza per analisi
-
----
-
-## 🛠️ Stack Tecnologico
-
-### Backend Core
-
-- **🐍 Python 3.11+**: Linguaggio principale
-- **🦜 LangChain 0.3.26**: Framework AI per LLM
-- **📊 LangGraph 0.5.0**: Orchestrazione agent con pattern ReAct
-- **📈 LangSmith 0.4.4**: Observability e debugging
-- **🤖 OpenAI API**: Modello GPT-4o-mini per reasoning
-
-### Web Framework
-
-- **⚡ FastAPI 0.115+**: Backend API moderno e veloce
-- **🔧 Uvicorn**: Server ASGI per produzione
-- **🌐 CORS Middleware**: Supporto cross-origin requests
-
-### WordPress Integration
-
-- **📝 WordPress REST API**: Endpoint nativi per contenuti
-- **🔌 Custom Endpoints**: Post types specializzati (progetti, certificazioni, etc.)
-- **🛡️ Error Handling**: Gestione robusta delle richieste API
-
-### Frontend
-
-- **⚛️ React 18**: UI component framework
-- **💅 Tailwind CSS**: Utility-first styling
-- **📱 Responsive Design**: Mobile-first approach
-- **📝 Markdown Support**: Rendering HTML da markdown
-- **💾 Persistent Storage**: LocalStorage con fallback in-memory
-
-### DevOps & Deployment
-
-- **📦 UV Package Manager**: Gestione dipendenze veloce
-- **🐳 Docker Ready**: Containerizzazione per deploy
-- **☁️ Railway Compatible**: Deploy cloud semplificato
-- **🔄 Git Workflow**: Version control e CI/CD
+- ✅ **React widget** responsive
+- ✅ **Persistenza sessioni** (localStorage)
+- ✅ **XSS protection** multi-layer
+- ✅ **Cross-page sync** automatico
+- ✅ **Markdown support** sicuro
+- ✅ **Mobile optimized**
 
 ---
 
-## 📊 Performance
+## 📈 Performance
 
-### Benchmarks Aggiornati
-
-- **⚡ Response Time**: < 1.5s con persistenza attiva
-- **💾 Memory Usage**: ~150MB con 100 messaggi in cache
-- **📱 Mobile Performance**: < 2s first load su 3G
-- **🔄 Cross-Page Sync**: < 100ms sincronizzazione
-- **🛡️ Security Validation**: < 10ms per input
-
-### Optimization Features
-
-- **Lazy Loading**: Caricamento progressivo componenti React
-- **Storage Cleanup**: Garbage collection automatica sessioni scadute
-- **Message Compression**: Ottimizzazione spazio localStorage
-- **Network Caching**: Cache intelligente richieste API
-- **XSS Prevention**: Validation ottimizzata con minimal overhead
-
----
-
-## 📊 LangSmith Integration
-
-```python
-@traceable(name="wordpress_chatbot_request")
-def process_chat_with_tracing(message: str, thread_id: str):
-    # Automatic tracing di conversazioni con sicurezza
-    return chatbot.chat(message, thread_id)
-```
-
-**Dashboard Features**:
-- 📈 Conversation analytics
-- 💰 Cost tracking
-- 🐛 Error monitoring con eventi sicurezza
-- 📊 Performance insights
+- **Response Time**: < 1.5s (con persistenza)
+- **Memory Usage**: ~150MB (100 messaggi cached)
+- **Security Validation**: < 10ms per input
+- **Test Execution**: 4.5s (101 test)
 
 ---
 
 ## 🚀 Deployment
 
-### Railway (Recommended)
+### Railway (Consigliato)
 
-1. **Connect Repository** su Railway
-2. **Set Environment Variables**:
-   ```
-   OPENAI_API_KEY=your_key
-   WORDPRESS_URL=https://www.veronicaschembri.com
-   LANGSMITH_API_KEY=your_langsmith_key
-   ```
-3. **Deploy**: Automatic build e deploy
+1. Connect repository su Railway
+2. Set environment variables (`.env` template)
+3. Auto-deploy on push
 
-### Docker
+### Requisiti Produzione
 
-```dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-```bash
-# Build e run
-docker build -t veronica-chatbot .
-docker run -p 8000:8000 veronica-chatbot
-```
-
-### Production Checklist
-
-#### Sicurezza ✅
-- [ ] XSS protection attiva
-- [ ] Input validation configurata
-- [ ] Security logging appropriato
-- [ ] Debug mode disabilitato
-
-#### Persistenza ✅
-- [ ] Session duration configurata (raccomandato: 7 giorni)
-- [ ] Conversation timeout appropriato (raccomandato: 24 ore)
-- [ ] Max messages ragionevole (raccomandato: 100)
-- [ ] Cross-page sync testato
-
-#### Performance ✅
-- [ ] Mobile responsive verificato
-- [ ] Storage cleanup configurato
-- [ ] API timeout appropriati
-- [ ] Loading states implementati
+- Python 3.11+
+- OpenAI API Key
+- WordPress REST API accessibile
+- (Optional) LangSmith API Key per tracing
 
 ---
 
-## 🔧 Customization
+## 📝 Development
 
-### Adding New Tools
+### Commands
 
-```python
-# In tools/wordpress_tools.py
-@tool
-def get_custom_data(query: str) -> str:
-    """Custom tool description"""
-    # Implementation with security validation
-    if not validate_input(query):
-        return json.dumps({"error": "Invalid input blocked"})
-    
-    return result
+```bash
+# Format code
+black src/
 
-# Add to tools/__init__.py
-TOOLS = [
-    search_blog_posts,
-    get_portfolio_projects,
-    get_custom_data,  # ← New tool
-    # ...
-]
-```
+# Type check
+mypy src/
 
-### WordPress Custom Endpoints
+# Run tests
+uv run pytest -v
 
-```php
-// In WordPress functions.php
-register_post_type('custom_type', [
-    'public' => true,
-    'show_in_rest' => true,  // Essential for REST API
-    'rest_base' => 'custom',
-]);
-```
+# Run server with reload
+uvicorn main:app --reload
 
-### Configuration Extension
-
-```python
-# In models/config.py
-class Configuration(BaseModel):
-    model: str = "gpt-4o-mini"
-    wordpress_base_url: str = "https://www.veronicaschembri.com"
-    custom_setting: str = "default_value"  # ← New setting
+# LangGraph Studio
+langgraph dev
 ```
 
 ---
 
 ## 🤝 Contributing
 
-1. **Fork** il repository
-2. **Create** feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to branch (`git push origin feature/amazing-feature`)
-5. **Open** Pull Request
+Questo è un progetto portfolio. Per suggerimenti o feedback:
 
-### Development Guidelines
-
-- Seguire l'architettura modulare esistente
-- Aggiungere test per nuove funzionalità
-- Mantenere la sicurezza XSS protection
-- Documentare API changes
-- Testare su mobile e desktop
-
----
-
-## 📝 License
-
-Questo progetto è licensed under the MIT License - vedi il file [LICENSE](LICENSE) per dettagli.
-
----
-
-## 📞 Support
-
-- **🌐 Website**: [veronicaschembri.com](https://www.veronicaschembri.com)
-- **📧 Email**: veronicaschembri@gmail.com
-- **💼 LinkedIn**: [linkedin.com/in/veronicaschembri](https://www.linkedin.com/in/veronicaschembri/)
-- **🐙 GitHub**: [github.com/Pandagan-85](https://github.com/Pandagan-85/)
+- 📧 Email: veronicaschembri@gmail.com
+- 💼 LinkedIn: [linkedin.com/in/veronicaschembri](https://www.linkedin.com/in/veronicaschembri/)
+- 🐙 GitHub: [github.com/Pandagan-85](https://github.com/Pandagan-85/)
 
 ---
 
@@ -508,6 +441,8 @@ Questo progetto è licensed under the MIT License - vedi il file [LICENSE](LICEN
 
 **⭐ Star questo repository se ti è stato utile!**
 
-*Made with ❤️ by Veronica Schembri - AI Engineer*
+_Made with ❤️ by Veronica Schembri - AI Engineer_
+
+**Stack**: Python · LangGraph · LangChain · FastAPI · React · WordPress
 
 </div>

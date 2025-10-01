@@ -1,14 +1,15 @@
 """
-Core endpoints (/, /health, /api/info) - moved from main.py
+Core endpoints (/, /health, /api/info)
 """
 
 import os
 from datetime import datetime
-from fastapi import APIRouter, HTTPException
 from typing import Dict
 
-from ..models import HealthResponse
+from fastapi import APIRouter, HTTPException
+
 from ..dependencies import get_chatbot
+from ..models import HealthResponse
 
 router = APIRouter()
 
@@ -20,7 +21,7 @@ async def root():
         "message": "Veronica Schembri WordPress Chatbot API",
         "version": "2.0.0",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
     }
 
 
@@ -29,7 +30,7 @@ async def health_check():
     """Health check completo"""
     try:
         chatbot = get_chatbot()
-        
+
         # Test chatbot
         chatbot_status = "healthy" if chatbot is not None else "unhealthy"
 
@@ -38,8 +39,11 @@ async def health_check():
         if chatbot:
             try:
                 wordpress_stats = chatbot.get_wordpress_stats()
-                wordpress_status = "healthy" if wordpress_stats.get(
-                    "status") == "success" else "unhealthy"
+                wordpress_status = (
+                    "healthy"
+                    if wordpress_stats.get("status") == "success"
+                    else "unhealthy"
+                )
             except Exception as e:
                 wordpress_status = "unhealthy"
                 wordpress_stats = {"error": str(e)}
@@ -48,9 +52,14 @@ async def health_check():
 
         # Test LangSmith
         from ...utils.tracing import LANGSMITH_ENABLED
+
         langsmith_status = "enabled" if LANGSMITH_ENABLED else "disabled"
 
-        overall_status = "healthy" if chatbot_status == "healthy" and wordpress_status == "healthy" else "degraded"
+        overall_status = (
+            "healthy"
+            if chatbot_status == "healthy" and wordpress_status == "healthy"
+            else "degraded"
+        )
 
         return HealthResponse(
             status=overall_status,
@@ -59,17 +68,15 @@ async def health_check():
                 "chatbot": chatbot_status,
                 "wordpress_api": wordpress_status,
                 "langsmith_tracing": langsmith_status,
-                "wordpress_details": wordpress_stats
-            }
+                "wordpress_details": wordpress_stats,
+            },
         )
 
     except Exception as e:
         return HealthResponse(
             status="unhealthy",
             timestamp=datetime.now().isoformat(),
-            services={
-                "error": str(e)
-            }
+            services={"error": str(e)},
         )
 
 
@@ -77,7 +84,7 @@ async def health_check():
 async def api_info():
     """Informazioni sull'API"""
     from ...utils.tracing import LANGSMITH_ENABLED
-    
+
     return {
         "name": "Veronica Schembri WordPress Chatbot API",
         "version": "2.0.0",
@@ -87,7 +94,7 @@ async def api_info():
             "WordPress API integration",
             "LangSmith tracing",
             "Conversation persistence",
-            "Professional AI representation"
+            "Professional AI representation",
         ],
         "endpoints": {
             "/": "Root endpoint",
@@ -95,11 +102,14 @@ async def api_info():
             "/wordpress/test": "Test WordPress connection",
             "/wordpress/stats": "WordPress content statistics",
             "/chat": "Main chat endpoint (POST)",
-            "/simple-chat": "Simple chat endpoint (POST)",
-            "/api/info": "This endpoint"
+            "/api/info": "This endpoint",
         },
         "langsmith": {
             "enabled": LANGSMITH_ENABLED,
-            "project": os.getenv("LANGSMITH_PROJECT", "veronica-wordpress-chatbot") if LANGSMITH_ENABLED else None
-        }
+            "project": (
+                os.getenv("LANGSMITH_PROJECT", "veronica-wordpress-chatbot")
+                if LANGSMITH_ENABLED
+                else None
+            ),
+        },
     }

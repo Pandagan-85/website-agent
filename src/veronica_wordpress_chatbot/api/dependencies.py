@@ -1,5 +1,5 @@
 """
-FastAPI dependencies - moved from main.py
+FastAPI dependencies and global instances
 """
 
 from slowapi import Limiter

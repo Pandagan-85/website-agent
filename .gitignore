@@ -1,5 +1,45 @@
+# Python
 .venv
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Environment
 .env
-__pycache__
-.DS_STORE
+.env.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# LangGraph
+.langgraph_api/
+
+# Logs
+logs/
+*.log
+
+# Project specific
+backup/
 veronica-chatbot
+CLAUDE.md
+INTERVIEW_GUIDE.md

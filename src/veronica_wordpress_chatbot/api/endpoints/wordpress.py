@@ -1,11 +1,11 @@
 """
-WordPress endpoints - moved from main.py
+WordPress endpoints
 """
 
 from fastapi import APIRouter, HTTPException
 
-from ..dependencies import get_chatbot
 from ...config import Configuration
+from ..dependencies import get_chatbot
 
 router = APIRouter()
 
@@ -16,17 +16,13 @@ async def test_wordpress():
     try:
         chatbot = get_chatbot()
         if chatbot is None:
-            raise HTTPException(
-                status_code=503, detail="Chatbot non inizializzato")
+            raise HTTPException(status_code=503, detail="Chatbot non inizializzato")
 
         stats = chatbot.get_wordpress_stats()
         return stats
 
     except Exception as e:
-        return {
-            "status": "error",
-            "message": f"Errore nel test WordPress: {str(e)}"
-        }
+        return {"status": "error", "message": f"Errore nel test WordPress: {str(e)}"}
 
 
 @router.get("/stats")
@@ -35,8 +31,7 @@ async def wordpress_stats():
     try:
         chatbot = get_chatbot()
         if chatbot is None:
-            raise HTTPException(
-                status_code=503, detail="Chatbot non inizializzato")
+            raise HTTPException(status_code=503, detail="Chatbot non inizializzato")
 
         stats = chatbot.get_wordpress_stats()
 
@@ -48,8 +43,8 @@ async def wordpress_stats():
                 f"{config.wordpress_base_url}/wp-json/wp/v2/posts",
                 f"{config.wordpress_base_url}/wp-json/wp/v2/projects",
                 f"{config.wordpress_base_url}/wp-json/wp/v2/certifications",
-                f"{config.wordpress_base_url}/wp-json/wp/v2/work-experiences"
-            ]
+                f"{config.wordpress_base_url}/wp-json/wp/v2/work-experiences",
+            ],
         }
 
         return stats
@@ -57,5 +52,5 @@ async def wordpress_stats():
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Errore nel recupero stats WordPress: {str(e)}"
+            "message": f"Errore nel recupero stats WordPress: {str(e)}",
         }

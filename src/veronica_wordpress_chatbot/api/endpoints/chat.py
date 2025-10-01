@@ -1,13 +1,17 @@
 """
-Chat endpoints - moved from main.py
+Chat endpoints
 """
 
 from datetime import datetime
+
 from fastapi import APIRouter, HTTPException, Request
 
-from ..models import ChatRequest, ChatResponse
-from ..dependencies import get_chatbot, limiter
+from ...utils.logging_config import setup_logging
 from ...utils.tracing import LANGSMITH_ENABLED, process_chat_with_tracing
+from ..dependencies import get_chatbot, limiter
+from ..models import ChatRequest, ChatResponse
+
+logger = setup_logging(__name__)
 
 router = APIRouter()
 
@@ -27,40 +31,21 @@ async def chat_endpoint(request: Request, chat_request: ChatRequest):
         # Process con tracing
         if LANGSMITH_ENABLED:
             response, trace_url = process_chat_with_tracing(
-                chat_request.message, chat_request.thread_id)
+                chat_request.message, chat_request.thread_id
+            )
         else:
             response = chatbot.chat(chat_request.message, chat_request.thread_id)
             trace_url = None
 
         return ChatResponse(
             response=response,
-            thread_id=chat_request.thread_id,
+            thread_id=chat_request.thread_id or "default",
             timestamp=datetime.now().isoformat(),
-            langsmith_trace_url=trace_url
+            langsmith_trace_url=trace_url,
         )
 
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ Errore nel processare la chat: {e}")
+        logger.error(f"Errore nel processare la chat: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Errore interno: {str(e)}")
-
-
-@router.post("/simple-chat")
-async def simple_chat_endpoint(request: dict):
-    """Endpoint semplificato per compatibilità con versioni precedenti"""
-    try:
-        message = request.get("message", "")
-        if not message:
-            raise HTTPException(status_code=400, detail="Messaggio richiesto")
-
-        chatbot = get_chatbot()
-        if chatbot is None:
-            return {"response": "Mi dispiace, il chatbot non è attualmente disponibile."}
-
-        response = chatbot.chat(message)
-        return {"response": response}
-
-    except Exception as e:
-        print(f"❌ Errore in simple chat: {e}")
-        return {"response": "Mi dispiace, c'è stato un errore nel processare la tua richiesta."}

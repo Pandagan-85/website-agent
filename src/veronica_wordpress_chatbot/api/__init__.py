@@ -1,10 +1,11 @@
 """
-FastAPI app factory - moved from main.py
+FastAPI app factory
 """
 
 from fastapi import FastAPI
-from .middleware import setup_middleware
+
 from .endpoints import setup_routes
+from .middleware import setup_middleware
 
 
 def create_app() -> FastAPI:
@@ -12,15 +13,15 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Veronica Schembri WordPress Chatbot",
         description="AI Chatbot powered by LangGraph and WordPress API with LangSmith tracing",
-        version="2.0.0"
+        version="2.0.0",
     )
-    
+
     # Setup middleware
     setup_middleware(app)
-    
+
     # Setup routes
     setup_routes(app)
-    
+
     return app
 
 

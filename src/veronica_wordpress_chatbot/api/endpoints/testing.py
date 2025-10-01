@@ -1,18 +1,20 @@
 """
-Testing and debug endpoints - moved from main.py
+Testing and debug endpoints
 """
 
 from datetime import datetime
+
 from fastapi import APIRouter, HTTPException, Request
 
-from ..models import ChatRequest
-from ..dependencies import get_chatbot, limiter
 from ...utils.tracing import LANGSMITH_ENABLED, process_chat_with_tracing
+from ..dependencies import get_chatbot, limiter
+from ..models import ChatRequest
 
 router = APIRouter()
 
 
 # --- TEST ENDPOINTS (da eliminare in produzione) ---
+
 
 @router.get("/test-rate-limit")
 @limiter.limit("3/minute")  # Solo 3 richieste per test
@@ -25,11 +27,12 @@ async def test_validation(request: ChatRequest):
     return {
         "message": "Validation passed!",
         "received_message": request.message,
-        "thread_id": request.thread_id
+        "thread_id": request.thread_id,
     }
 
 
 # --- DEBUG ENDPOINTS ---
+
 
 @router.get("/debug/tools")
 async def debug_tools():
@@ -39,26 +42,18 @@ async def debug_tools():
 
         tools_info = []
         for tool in TOOLS:
-            tools_info.append({
-                "name": tool.name,
-                "description": tool.description,
-                "args": tool.args
-            })
+            tools_info.append(
+                {"name": tool.name, "description": tool.description, "args": tool.args}
+            )
 
-        return {
-            "status": "success",
-            "tools_count": len(TOOLS),
-            "tools": tools_info
-        }
+        return {"status": "success", "tools_count": len(TOOLS), "tools": tools_info}
 
     except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e)
-        }
+        return {"status": "error", "message": str(e)}
 
 
 # --- TEST CONVERSATION ---
+
 
 @router.post("/test/conversation")
 async def test_conversation():
@@ -71,7 +66,7 @@ async def test_conversation():
         "Ciao! Chi sei?",
         "Parlami dei tuoi ultimi articoli",
         "Che progetti hai nel tuo portfolio?",
-        "Quali certificazioni hai conseguito?"
+        "Quali certificazioni hai conseguito?",
     ]
 
     results = []
@@ -80,29 +75,29 @@ async def test_conversation():
     for i, message in enumerate(test_messages):
         try:
             if LANGSMITH_ENABLED:
-                response, trace_url = process_chat_with_tracing(
-                    message, thread_id)
+                response, trace_url = process_chat_with_tracing(message, thread_id)
             else:
                 response = chatbot.chat(message, thread_id)
                 trace_url = None
 
-            results.append({
-                "step": i + 1,
-                "message": message,
-                "response": response[:200] + "..." if len(response) > 200 else response,
-                "trace_url": trace_url,
-                "success": True
-            })
+            results.append(
+                {
+                    "step": i + 1,
+                    "message": message,
+                    "response": (
+                        response[:200] + "..." if len(response) > 200 else response
+                    ),
+                    "trace_url": trace_url,
+                    "success": True,
+                }
+            )
         except Exception as e:
-            results.append({
-                "step": i + 1,
-                "message": message,
-                "error": str(e),
-                "success": False
-            })
+            results.append(
+                {"step": i + 1, "message": message, "error": str(e), "success": False}
+            )
 
     return {
         "test_results": results,
         "thread_id": thread_id,
-        "langsmith_enabled": LANGSMITH_ENABLED
+        "langsmith_enabled": LANGSMITH_ENABLED,
     }
