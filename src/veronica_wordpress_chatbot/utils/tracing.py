@@ -60,7 +60,7 @@ def process_chat_with_tracing(
             # Il trace URL viene generato automaticamente da LangSmith
             project = os.getenv("LANGSMITH_PROJECT", "veronica-wordpress-chatbot")
             trace_url = f"https://smith.langchain.com/projects/{project}"
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"Errore generazione trace URL: {e}")
 
     return response, trace_url

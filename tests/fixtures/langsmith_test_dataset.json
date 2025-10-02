@@ -1,0 +1,82 @@
+[
+  {
+    "inputs_1": "Ciao! Qual è il tuo cibo preferito?",
+    "outputs_1": "Dovrebbe rispondere 'Amo il sushi e la pizza' usando il personal_summary SENZA chiamare tool"
+  },
+  {
+    "inputs_1": "Sei sposata?",
+    "outputs_1": "Dovrebbe rispondere 'Sì, ho una moglie fantastica' usando il personal_summary SENZA chiamare tool"
+  },
+  {
+    "inputs_1": "Quali sono le tue passioni?",
+    "outputs_1": "Dovrebbe menzionare serie TV, fumetti, Magic: The Gathering, Lego dal personal_summary SENZA chiamare tool"
+  },
+  {
+    "inputs_1": "Che percorso professionale hai fatto?",
+    "outputs_1": "Dovrebbe raccontare l'evoluzione da illustratrice → programmazione → AI Engineer usando il personal_summary"
+  },
+  {
+    "inputs_1": "Che strumenti usi per organizzarti?",
+    "outputs_1": "Dovrebbe rispondere 'Cursor e Obsidian' dal personal_summary SENZA chiamare tool"
+  },
+  {
+    "inputs_1": "Quali certificazioni hai conseguito?",
+    "outputs_1": "Dovrebbe chiamare il tool get_certifications() e mostrare le certificazioni (es. Hugging Face AI Agents Course, etc.)"
+  },
+  {
+    "inputs_1": "Di cosa parla il tuo ultimo articolo?",
+    "outputs_1": "Dovrebbe chiamare il tool get_latest_blog_post() e riassumere il contenuto dell'ultimo articolo pubblicato"
+  },
+  {
+    "inputs_1": "Che libri mi consigli sull'AI?",
+    "outputs_1": "Dovrebbe interpretare come 'quali libri HAI LETTO' e chiamare get_books_and_reading() per mostrare i libri letti/recensiti"
+  },
+  {
+    "inputs_1": "Quali strumenti e tecnologie usi nei tuoi progetti?",
+    "outputs_1": "Dovrebbe chiamare get_tools_and_stack() per mostrare lo stack tecnologico completo (Python, LangChain, Docker, AWS, etc.)"
+  },
+  {
+    "inputs_1": "Hai esperienza con LangChain?",
+    "outputs_1": "Dovrebbe chiamare search_all_content('LangChain') per cercare progetti e articoli su LangChain"
+  },
+  {
+    "inputs_1": "Come posso contattarti?",
+    "outputs_1": "Dovrebbe chiamare get_contact_info() e fornire email, LinkedIn, GitHub, sito web"
+  },
+  {
+    "inputs_1": "Quali sono i tuoi ultimi progetti?",
+    "outputs_1": "Dovrebbe chiamare get_portfolio_projects() e mostrare i progetti del portfolio (AI, web development, etc.)"
+  },
+  {
+    "inputs_1": "Hai esperienze lavorative con Python?",
+    "outputs_1": "Dovrebbe chiamare get_work_experience() per mostrare le esperienze lavorative e menzionare l'uso di Python"
+  },
+  {
+    "inputs_1": "Quali articoli hai scritto su RAG?",
+    "outputs_1": "Dovrebbe chiamare search_blog_posts('RAG') per cercare articoli sul blog riguardanti RAG (Retrieval Augmented Generation)"
+  },
+  {
+    "inputs_1": "Parlami dei tuoi progetti AI con agenti",
+    "outputs_1": "Dovrebbe chiamare get_portfolio_projects() o search_all_content('agenti') per mostrare progetti con AI agents"
+  },
+  {
+    "inputs_1": "Come si crea un sito WordPress?",
+    "outputs_1": "Dovrebbe RIFIUTARE dicendo 'Mi occupo solo di domande su Veronica Schembri: percorso, progetti, articoli e competenze'"
+  },
+  {
+    "inputs_1": "Cos'è il machine learning?",
+    "outputs_1": "Dovrebbe RIFIUTARE perché è una domanda teorica generica non legata all'esperienza di Veronica"
+  },
+  {
+    "inputs_1": "Qual è la ricetta della carbonara?",
+    "outputs_1": "Dovrebbe RIFIUTARE perché completamente fuori scope (non riguarda Veronica)"
+  },
+  {
+    "inputs_1": "Spiegami come funziona Python",
+    "outputs_1": "Dovrebbe RIFIUTARE perché è un tutorial generico, non legato all'esperienza di Veronica"
+  },
+  {
+    "inputs_1": "Hai formazione su AI e machine learning?",
+    "outputs_1": "Dovrebbe chiamare get_certifications() e mostrare i corsi su AI/ML (AI Engineering, Machine Learning, Data Science, etc.)"
+  }
+]

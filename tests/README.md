@@ -9,7 +9,9 @@ Current test status: **90+ tests passing**
 ### Test Categories
 
 #### Unit Tests (`tests/unit/`)
+
 - **test_security.py** (23 tests) - Security validation
+
   - XSS attack prevention (script tags, event handlers, dangerous protocols)
   - Input validation (length limits, character encoding)
   - DoS prevention (suspicious character repetition)
@@ -24,7 +26,9 @@ Current test status: **90+ tests passing**
   - JSON serialization
 
 #### Integration Tests (`tests/integration/`)
+
 - **test_workflow.py** (15 tests) - LangGraph workflow
+
   - ReAct pattern implementation
   - State management and memory
   - Tool calling and routing
@@ -39,6 +43,7 @@ Current test status: **90+ tests passing**
   - Security integration
 
 #### End-to-End Tests (`tests/e2e/`)
+
 - Complete conversation flows
 - Multi-turn interactions
 - System integration
@@ -46,17 +51,20 @@ Current test status: **90+ tests passing**
 ## 🚀 Running Tests
 
 ### All Tests
+
 ```bash
 uv run pytest
 ```
 
 ### Specific Test Files
+
 ```bash
 uv run pytest tests/unit/test_security.py -v
 uv run pytest tests/integration/test_workflow.py -v
 ```
 
 ### By Category
+
 ```bash
 uv run pytest tests/unit/          # Unit tests only
 uv run pytest tests/integration/   # Integration tests only
@@ -64,6 +72,7 @@ uv run pytest tests/e2e/            # E2E tests only
 ```
 
 ### By Marker
+
 ```bash
 uv run pytest -m security          # Security tests
 uv run pytest -m langgraph         # LangGraph tests
@@ -72,6 +81,7 @@ uv run pytest -m wordpress         # WordPress tests
 ```
 
 ### With Coverage
+
 ```bash
 uv run pytest --cov=src/veronica_wordpress_chatbot --cov-report=html
 ```
@@ -95,19 +105,23 @@ Tests are marked with pytest markers for easy filtering:
 Shared fixtures are defined in `conftest.py`:
 
 ### Environment Setup
+
 - `setup_test_env` - Sets test environment variables
 
 ### Mock Data
+
 - `mock_wordpress_post` - Sample blog post data
 - `mock_wordpress_project` - Sample project data
 - `mock_wordpress_certification` - Sample certification data
 - `mock_wordpress_client` - Mocked WordPress client
 
 ### Configuration
+
 - `test_config` - Test configuration instance
 - `test_client` - FastAPI TestClient
 
 ### Sample Data
+
 - `sample_chat_messages` - Valid chat messages
 - `malicious_inputs` - XSS attack samples
 - `valid_thread_ids` - Valid thread IDs
@@ -116,6 +130,7 @@ Shared fixtures are defined in `conftest.py`:
 ## 📚 Writing New Tests
 
 ### Unit Test Example
+
 ```python
 import pytest
 from src.veronica_wordpress_chatbot.api.security import validate_input_security
@@ -127,6 +142,7 @@ def test_reject_xss_attack():
 ```
 
 ### Integration Test Example
+
 ```python
 from unittest.mock import patch
 
@@ -145,6 +161,7 @@ def test_workflow_execution(mock_chat_openai):
 ```
 
 ### Using Fixtures
+
 ```python
 def test_with_mock_client(mock_wordpress_client):
     """Test using mocked WordPress client"""
@@ -155,27 +172,35 @@ def test_with_mock_client(mock_wordpress_client):
 ## 🎯 Key Testing Principles
 
 ### 1. Security Testing
+
 All security validation is thoroughly tested:
+
 - XSS attack vectors (14+ patterns)
 - Input sanitization
 - Resource exhaustion prevention
 - Thread ID validation
 
 ### 2. Mocking External Dependencies
+
 WordPress API calls are mocked to:
+
 - Avoid network calls in tests
 - Ensure consistent test data
 - Test error scenarios
 
 ### 3. LangGraph Testing
+
 Workflow tests verify:
+
 - ReAct pattern implementation
 - State management
 - Memory/checkpointing
 - Tool calling and routing
 
 ### 4. API Testing
+
 FastAPI endpoints are tested with:
+
 - TestClient for HTTP simulation
 - Request/response validation
 - Error handling
@@ -184,21 +209,25 @@ FastAPI endpoints are tested with:
 ## 🐛 Debugging Failed Tests
 
 ### Verbose Output
+
 ```bash
 uv run pytest -v --tb=long
 ```
 
 ### Run Single Test
+
 ```bash
 uv run pytest tests/unit/test_security.py::TestInputSecurityValidation::test_reject_script_tags -v
 ```
 
 ### Print Debugging
+
 ```bash
 uv run pytest -s  # Shows print statements
 ```
 
 ### Drop into Debugger on Failure
+
 ```bash
 uv run pytest --pdb
 ```
@@ -221,18 +250,21 @@ Tests are designed to run in CI/CD pipelines:
 This test suite demonstrates:
 
 1. **Testing Best Practices**
+
    - Comprehensive coverage (90+ tests)
    - Clear test organization (unit/integration/e2e)
    - Proper use of fixtures and mocks
    - Descriptive test names and docstrings
 
 2. **LangGraph/LangChain Knowledge**
+
    - Testing AI agent workflows
    - Mocking LLM responses
    - State management verification
    - Tool testing strategies
 
 3. **Security Awareness**
+
    - XSS prevention testing
    - Input validation coverage
    - DoS attack prevention
@@ -254,6 +286,7 @@ This test suite demonstrates:
 ## 🤝 Contributing
 
 When adding new features, please:
+
 1. Write tests first (TDD approach)
 2. Ensure all tests pass before committing
 3. Add integration tests for new workflows

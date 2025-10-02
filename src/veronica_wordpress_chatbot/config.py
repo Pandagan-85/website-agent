@@ -99,6 +99,7 @@ REQUEST_TIMEOUT = 15
 # Contact information
 CONTACT_INFO = {
     "website": "https://www.veronicaschembri.com",
+    'github': "https://github.com/Pandagan-85/",
     "email": "veronicaschembri@gmail.com",
     "linkedin": "https://www.linkedin.com/in/veronicaschembri/",
     "location": "Palermo, Sicilia",

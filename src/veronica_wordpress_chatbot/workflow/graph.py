@@ -103,7 +103,3 @@ def create_graph() -> Any:
 def get_graph() -> Any:
     """Funzione di export per LangGraph Studio"""
     return create_graph()
-
-
-# Alias per compatibilità
-graph = get_graph()

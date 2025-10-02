@@ -6,7 +6,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)](https://fastapi.tiangolo.com/)
 [![LangChain](https://img.shields.io/badge/LangChain-0.3.26-orange.svg)](https://python.langchain.com/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-0.5.0-purple.svg)](https://langchain-ai.github.io/langgraph/)
-[![Tests](https://img.shields.io/badge/tests-90%2B%20passing-success.svg)](#-testing)
+[![Tests](https://img.shields.io/badge/tests-69%20passing-success.svg)](#-testing)
 
 ---
 
@@ -21,8 +21,9 @@ Chatbot AI che rappresenta Veronica Schembri sul suo portfolio, utilizzando il *
 - **🌐 WordPress Integration**: 9 tools specializzati per accesso contenuti
 - **🛡️ Sicurezza Avanzata**: 23+ test per XSS, DoS prevention, input validation
 - **📱 React Widget**: Frontend responsive con persistenza sessioni
-- **📊 Observability**: LangSmith integration per monitoring
-- **🧪 Test Suite**: 90+ test (unit, integration, e2e)
+- **📊 Observability**: LangSmith integration per monitoring + 20 test questions dataset
+- **🧪 Test Suite**: 69 test pytest + 20 LangSmith evaluation questions - 100% pass rate
+- **🎨 Template System**: Separation of concerns (prompt logic vs content)
 
 ---
 
@@ -133,8 +134,10 @@ src/veronica_wordpress_chatbot/
 ├── models.py             # LangGraph State (TypedDict)
 ├── config.py             # Configuration
 └── utils/
+    ├── logging_config.py # Centralized logging (3 handlers)
     ├── prompts.py        # System prompt generation
-    └── tracing.py        # LangSmith integration
+    ├── tracing.py        # LangSmith integration
+    └── templates/        # Template files (prompt, personal summary)
 ```
 
 ### 🛠️ WordPress Tools
@@ -146,9 +149,9 @@ src/veronica_wordpress_chatbot/
 3. **`get_portfolio_projects`** - Progetti del portfolio
 4. **`get_certifications`** - Certificazioni e formazione
 5. **`get_work_experience`** - Esperienze lavorative
-6. **`get_books_and_reading`** - Libri letti
-7. **`get_tools_and_stack`** - Stack tecnologico
-8. **`search_all_content`** - Ricerca globale
+6. **`get_books_and_reading`** - Libri letti e recensioni
+7. **`get_tools_and_stack`** - Strumenti personali (4 categorie) + Stack tecnologico professionale (5 categorie)
+8. **`search_all_content`** - Ricerca globale multi-contenuto
 9. **`get_contact_info`** - Informazioni contatto
 
 Ogni tool:
@@ -219,7 +222,7 @@ python main.py
 
 ### Test Suite
 
-Comprehensive test suite con **90+ test passing**:
+Comprehensive test suite con **69 test passing** (100% pass rate):
 
 ```bash
 # Run all tests
@@ -235,12 +238,30 @@ uv run pytest --cov=src/veronica_wordpress_chatbot --cov-report=html
 
 ### Test Coverage
 
-- **23 test security** - XSS prevention, DoS protection, input validation
+- **23 test security** - XSS prevention, DoS protection, input validation, rate limiting
 - **27 test tools** - LangChain tools con WordPress mock
-- **15 test workflow** - LangGraph ReAct pattern, state management
-- **40+ test API** - FastAPI endpoints, validation, error handling
+- **19 test workflow** - LangGraph ReAct pattern, state management, memory
+- **Total: 69 tests, 1 skipped** (pytest-benchmark non installato)
 
-Vedi [`tests/README.md`](tests/README.md) per dettagli.
+**Execution time**: ~4.6 secondi
+
+### LangSmith Dataset & Evaluation
+
+**20 test questions** categorizzate per evaluation automatica su LangSmith:
+
+- **5 domande personali** - Verificano uso corretto di `personal_summary` (no tool calls)
+- **11 domande tecniche** - Verificano chiamata tool corretti (`get_certifications`, `get_portfolio_projects`, etc.)
+- **4 domande out-of-scope** - Verificano rifiuto corretto di domande generiche
+
+```bash
+# Dataset location
+tests/fixtures/langsmith_test_dataset.jsonl
+
+# Documentation
+tests/fixtures/README_LANGSMITH_DATASET.md
+```
+
+**Strategia evaluation completa** con roadmap per 15+ metriche (Correctness, Tool Usage Accuracy, Factuality, Latency, Robustness, etc.). Vedi [documentazione dettagliata](tests/fixtures/README_LANGSMITH_DATASET.md#-strategia-di-evaluation-completa).
 
 ---
 
@@ -296,8 +317,9 @@ MALICIOUS_PATTERNS = [
 ### WordPress Integration
 
 - **WordPress REST API** - Endpoint nativi
-- **Custom Post Types** - progetti, certificazioni, work-experiences, books, tools
-- **ACF (Advanced Custom Fields)** - Campi personalizzati
+- **Custom Post Types** - progetti, certificazioni, work-experiences, books, tools, stacks
+- **ACF (Advanced Custom Fields)** - Campi personalizzati (projects, certifications, work-experiences, books)
+- **Taxonomies** - tool-category (4 categorie), stack-category (5 categorie)
 
 ### Frontend (WordPress Plugin)
 
@@ -380,10 +402,11 @@ cp -r WP_Plugin/plugin-wp-v_4/ /path/to/wordpress/wp-content/plugins/veronica-ch
 
 ## 📈 Performance
 
-- **Response Time**: < 1.5s (con persistenza)
-- **Memory Usage**: ~150MB (100 messaggi cached)
+- **Response Time**: 2-5s (LLM latency dipendente da OpenAI)
+- **WordPress API**: 0.5-1s per endpoint
+- **Memory Usage**: MemorySaver in-memory (scalabile con PostgreSQL checkpointer)
 - **Security Validation**: < 10ms per input
-- **Test Execution**: 4.5s (101 test)
+- **Test Execution**: 4.6s (69 test)
 
 ---
 
@@ -405,6 +428,18 @@ cp -r WP_Plugin/plugin-wp-v_4/ /path/to/wordpress/wp-content/plugins/veronica-ch
 ---
 
 ## 📝 Development
+
+### Code Quality & Best Practices
+
+Il progetto segue best practices rigorose:
+
+- **✅ No variabili globali**: Pattern factory (`get_chatbot()`) invece di istanze globali
+- **✅ Logging centralizzato**: 3 handlers (console, file, errors) con `setup_logging(__name__)`
+- **✅ Template system**: Prompt separato da logica (vedi `utils/templates/`)
+- **✅ Defensive programming**: Fallback su 3 livelli per caricamento file
+- **✅ Path handling corretto**: `Path(__file__).parent` invece di path relativi
+- **✅ Type hints**: Mypy strict mode per type safety
+- **✅ DRY principle**: No duplicazioni, componenti riutilizzabili
 
 ### Commands
 

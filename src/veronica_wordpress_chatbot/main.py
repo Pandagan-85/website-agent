@@ -12,30 +12,23 @@ from .utils.tracing import setup_langsmith
 # Create FastAPI app
 app = create_app()
 
-# Global chatbot instance
-chatbot = None
-
 
 @app.on_event("startup")
 async def startup_event():
     """Inizializza il chatbot all'avvio"""
-    global chatbot
     try:
         print("🚀 Inizializzazione chatbot...")
 
         # Setup LangSmith
         setup_langsmith()
 
-        # Initialize chatbot
-        chatbot = VeronicaChatbot()
-
-        # Set chatbot in dependencies
-        set_chatbot(chatbot)
+        # Initialize chatbot and set in dependencies
+        set_chatbot(VeronicaChatbot())
 
         print("✅ Chatbot inizializzato con successo!")
     except Exception as e:
         print(f"❌ Errore inizializzazione chatbot: {e}")
-        chatbot = None
+        set_chatbot(None)
 
 
 if __name__ == "__main__":

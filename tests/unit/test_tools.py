@@ -214,7 +214,8 @@ class TestProfileTools:
         assert parsed["total"] == 1
         assert "certifications" in parsed
         assert parsed["certifications"][0]["title"] == "AI Agent Development"
-        assert "ente" in parsed["certifications"][0]
+        assert "issuer" in parsed["certifications"][0]
+        assert parsed["certifications"][0]["issuer"] == "Hugging Face"
 
     @patch('src.veronica_wordpress_chatbot.tools.profile_tools.get_wordpress_client')
     def test_get_work_experience_success(self, mock_client_class):
