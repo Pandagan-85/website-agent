@@ -101,6 +101,9 @@ def create_graph():
     return builder.compile(checkpointer=MemorySaver())
 ```
 
+![LangGraph Studio - ReAct Pattern Visualization](./docs/images/grafo_langGraph_Studio.png)
+_Il grafo visualizza il pattern ReAct: agent (reasoning) → tools (actions) → loop iterativo fino a risposta completa_
+
 **Vantaggi del Pattern ReAct:**
 
 - ✅ **Reasoning trasparente**: Ogni decisione è tracciabile
@@ -160,6 +163,11 @@ Ogni tool:
 - Restituisce JSON per dati strutturati
 - Gestisce errori gracefully
 - Usa `ContentProcessor` per pulire HTML
+
+### 📊 LangSmith Tracing
+
+![LangSmith Run Trace](./docs/images/run_tracing.png)
+_Esempio di trace LangSmith: ogni step dell'esecuzione è tracciato con timing, input/output e tool calls_
 
 ---
 
@@ -247,6 +255,8 @@ uv run pytest --cov=src/veronica_wordpress_chatbot --cov-report=html
 
 ### LangSmith Dataset & Evaluation
 
+Uso un evaluator LLM as judge
+
 **20 test questions** categorizzate per evaluation automatica su LangSmith:
 
 - **5 domande personali** - Verificano uso corretto di `personal_summary` (no tool calls)
@@ -261,7 +271,14 @@ tests/fixtures/langsmith_test_dataset.jsonl
 tests/fixtures/README_LANGSMITH_DATASET.md
 ```
 
-**Strategia evaluation completa** con roadmap per 15+ metriche (Correctness, Tool Usage Accuracy, Factuality, Latency, Robustness, etc.). Vedi [documentazione dettagliata](tests/fixtures/README_LANGSMITH_DATASET.md#-strategia-di-evaluation-completa).
+![LangSmith Evaluator - Correctness Check](./docs/images/evaluator_correctnes.png)
+_L'evaluator "Correctness" verifica automaticamente che le risposte siano accurate e usino i tool appropriati_
+
+![LangGraph Studio - LLM as Judge Evaluator](./docs/images/evaluator_langGraph_studio.png)
+_Setup dell'evaluator nell'interfaccia LangGraph Studio per testing automatico con LLM as judge_
+
+![LangGraph Trace - Out-of-Scope Handling](./docs/images/grafo_no_risposta.png)
+_Esempio di trace quando il chatbot rifiuta correttamente una domanda fuori scope_
 
 ---
 
@@ -362,6 +379,8 @@ Content-Type: application/json
 }
 ```
 
+![](./docs/images/fastapi-swagger-doc.png)
+
 ### Health Check
 
 ```http
@@ -400,16 +419,6 @@ cp -r WP_Plugin/plugin-wp-v_4/ /path/to/wordpress/wp-content/plugins/veronica-ch
 
 ---
 
-## 📈 Performance
-
-- **Response Time**: 2-5s (LLM latency dipendente da OpenAI)
-- **WordPress API**: 0.5-1s per endpoint
-- **Memory Usage**: MemorySaver in-memory (scalabile con PostgreSQL checkpointer)
-- **Security Validation**: < 10ms per input
-- **Test Execution**: 4.6s (69 test)
-
----
-
 ## 🚀 Deployment
 
 ### Railway (Consigliato)
@@ -436,8 +445,6 @@ Il progetto segue best practices rigorose:
 - **✅ No variabili globali**: Pattern factory (`get_chatbot()`) invece di istanze globali
 - **✅ Logging centralizzato**: 3 handlers (console, file, errors) con `setup_logging(__name__)`
 - **✅ Template system**: Prompt separato da logica (vedi `utils/templates/`)
-- **✅ Defensive programming**: Fallback su 3 livelli per caricamento file
-- **✅ Path handling corretto**: `Path(__file__).parent` invece di path relativi
 - **✅ Type hints**: Mypy strict mode per type safety
 - **✅ DRY principle**: No duplicazioni, componenti riutilizzabili
 

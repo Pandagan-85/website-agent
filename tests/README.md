@@ -4,7 +4,7 @@ Comprehensive test suite for the AI chatbot project, demonstrating best practice
 
 ## 📊 Test Coverage
 
-Current test status: **90+ tests passing**
+Current test status: **69 tests passing** (100% pass rate)
 
 ### Test Categories
 
@@ -27,26 +27,22 @@ Current test status: **90+ tests passing**
 
 #### Integration Tests (`tests/integration/`)
 
-- **test_workflow.py** (15 tests) - LangGraph workflow
+- **test_workflow.py** (19 tests) - LangGraph workflow
 
   - ReAct pattern implementation
   - State management and memory
   - Tool calling and routing
   - Conversation persistence
   - Conditional edges
+  - Multi-turn conversations
 
-- **test_api_endpoints.py** (40 tests) - FastAPI endpoints
-  - Request/response validation
-  - Error handling
-  - Rate limiting
-  - CORS middleware
-  - Security integration
+#### LangSmith Evaluation Dataset (`tests/fixtures/`)
 
-#### End-to-End Tests (`tests/e2e/`)
-
-- Complete conversation flows
-- Multi-turn interactions
-- System integration
+- **langsmith_test_dataset.jsonl** (20 questions) - Automated evaluation
+  - 5 personal questions (should use personal_summary, no tools)
+  - 11 technical questions (should call correct tools)
+  - 4 out-of-scope questions (should refuse correctly)
+  - See [README_LANGSMITH_DATASET.md](fixtures/README_LANGSMITH_DATASET.md) for evaluation strategy
 
 ## 🚀 Running Tests
 
@@ -71,15 +67,6 @@ uv run pytest tests/integration/   # Integration tests only
 uv run pytest tests/e2e/            # E2E tests only
 ```
 
-### By Marker
-
-```bash
-uv run pytest -m security          # Security tests
-uv run pytest -m langgraph         # LangGraph tests
-uv run pytest -m api               # API tests
-uv run pytest -m wordpress         # WordPress tests
-```
-
 ### With Coverage
 
 ```bash
@@ -88,17 +75,13 @@ uv run pytest --cov=src/veronica_wordpress_chatbot --cov-report=html
 
 The coverage report will be generated in `htmlcov/index.html`.
 
-## 📝 Test Markers
+## 📝 Test Organization
 
-Tests are marked with pytest markers for easy filtering:
+Tests are organized by directory for easy filtering:
 
-- `@pytest.mark.unit` - Unit tests
-- `@pytest.mark.integration` - Integration tests
-- `@pytest.mark.e2e` - End-to-end tests
-- `@pytest.mark.security` - Security-related tests
-- `@pytest.mark.langgraph` - LangGraph workflow tests
-- `@pytest.mark.api` - FastAPI endpoint tests
-- `@pytest.mark.wordpress` - WordPress integration tests
+- **`tests/unit/`** - Unit tests (test_security.py, test_tools.py)
+- **`tests/integration/`** - Integration tests (test_workflow.py)
+- **`tests/fixtures/`** - Test data and LangSmith evaluation dataset
 
 ## 🛠️ Test Fixtures
 
@@ -251,10 +234,11 @@ This test suite demonstrates:
 
 1. **Testing Best Practices**
 
-   - Comprehensive coverage (90+ tests)
-   - Clear test organization (unit/integration/e2e)
+   - Comprehensive coverage (69 pytest tests + 20 LangSmith evaluation questions)
+   - Clear test organization (unit/integration)
    - Proper use of fixtures and mocks
    - Descriptive test names and docstrings
+   - 100% pass rate
 
 2. **LangGraph/LangChain Knowledge**
 
@@ -262,19 +246,21 @@ This test suite demonstrates:
    - Mocking LLM responses
    - State management verification
    - Tool testing strategies
+   - ReAct pattern implementation
 
 3. **Security Awareness**
 
-   - XSS prevention testing
+   - XSS prevention testing (14+ attack patterns)
    - Input validation coverage
    - DoS attack prevention
    - OWASP best practices
+   - 23 dedicated security tests
 
-4. **API Testing**
-   - FastAPI TestClient usage
-   - Request/response validation
-   - Error handling verification
-   - Middleware testing
+4. **AI Evaluation Strategy**
+   - LangSmith dataset with 20 categorized questions
+   - Automated evaluation with custom evaluators
+   - Roadmap for 15+ quality metrics (Correctness, Tool Usage, Factuality, Latency, etc.)
+   - Production-ready monitoring approach
 
 ## 📖 Additional Resources
 
